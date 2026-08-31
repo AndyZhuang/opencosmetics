@@ -1,0 +1,136 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "last_updated": "2025-06-23",
+    "sources": [
+      "MixMyRoutine (KBAI, 41 rules) — https://github.com/Yalfarodeleon/MixMyRoutine",
+      "NIFDC 化妆品安全技术规范 (STSC 2015) — 限用 47 + 准用 4 类",
+      "NIFDC 儿童化妆品技术指导原则 (2023-08-31)",
+      "中检院 完整版安全评估指南 (2021-04-09)",
+      "FDA Cosmetic Event reports 85,511 (openFDA)"
+    ]
+  },
+  "rule_categories": {
+    "compatibility": {
+      "description": "Ingredient pair incompatibilities (antagonism, degradation, instability)",
+      "rules": [
+        {"id": "COMP-001", "severity": "block", "ingredients": ["RETINOL", "VITAMIN_C"], "rationale": "酸度冲突 (低 pH 维 C 破坏视黄醇活性, 顺序不对导致刺激)", "alternatives": ["VITAMIN_C_AM", "RETINAL"]},
+        {"id": "COMP-002", "severity": "warn", "ingredients": ["RETINOL", "AHA"], "rationale": "双重角质剥脱 → 屏障受损", "alternatives": ["隔天使用", "PHAs"]},
+        {"id": "COMP-003", "severity": "warn", "ingredients": ["RETINOL", "BHA"], "rationale": "双重角质剥脱", "alternatives": ["降低 BHA 浓度"]},
+        {"id": "COMP-004", "severity": "block", "ingredients": ["BENZOYL_PEROXIDE", "VITAMIN_C"], "rationale": "BPO 氧化维 C (L-抗坏血酸失效), 间隔 ≥ 2h", "alternatives": ["VITAMIN_C_AM"]},
+        {"id": "COMP-005", "severity": "warn", "ingredients": ["BENZOYL_PEROXIDE", "RETINOL"], "rationale": "BPO 使视黄醇失活", "alternatives": ["隔天使用"]},
+        {"id": "COMP-006", "severity": "warn", "ingredients": ["RETINOL", "NIACINAMIDE"], "rationale": "高浓度时可能泛红 (低浓度无问题)", "alternatives": ["间隔使用"]},
+        {"id": "COMP-007", "severity": "block", "ingredients": ["VITAMIN_C", "NIACINAMIDE"], "rationale": "高浓度时形成烟酸, 引起泛红 (传统认知, 现代配方已稳定化)", "alternatives": ["使用稳定衍生物 (SAP, MAP)"]},
+        {"id": "COMP-008", "severity": "warn", "ingredients": ["RETINOL", "VITAMIN_A_PALMITATE"], "rationale": "叠加维 A 类, 刺激过强"},
+        {"id": "COMP-009", "severity": "warn", "ingredients": ["GLYCERIN", "DIMETHICONE"], "rationale": "硅油阻水, 降低甘油保湿"},
+        {"id": "COMP-010", "severity": "warn", "ingredients": ["AHA", "BHA"], "rationale": "双重去角质"},
+        {"id": "COMP-011", "severity": "warn", "ingredients": ["COPPER_PEPTIDES", "VITAMIN_C"], "rationale": "铜肽结合维 C 螯合, 双方活性降低", "alternatives": ["分时段使用"]},
+        {"id": "COMP-012", "severity": "warn", "ingredients": ["RETINOL", "GLYCOLIC_ACID"], "rationale": "双重角质剥脱 + 酸性环境破坏视黄醇"},
+        {"id": "COMP-013", "severity": "block", "ingredients": ["SALICYLIC_ACID", "BENZOYL_PEROXIDE"], "rationale": "酸碱中和, 双方失活"},
+        {"id": "COMP-014", "severity": "warn", "ingredients": ["RETINOL", "VITAMIN_C"], "context": "孕妇", "rationale": "维 A 类致畸, 孕期禁用 (TGA Category D)"},
+        {"id": "COMP-015", "severity": "warn", "ingredients": ["HYDROQUINONE", "BENZOYL_PEROXIDE"], "rationale": "BPO 氧化氢醌, 产生黑褐色染色"}
+      ]
+    },
+    "ph_safety": {
+      "description": "pH range and stability rules",
+      "rules": [
+        {"id": "PH-001", "severity": "block", "context": "驻留类成人", "pH_min": 4.5, "pH_max": 7.5, "source": "儿童化妆品技术指导原则"},
+        {"id": "PH-002", "severity": "block", "context": "淋洗类成人", "pH_min": 4.5, "pH_max": 8.5},
+        {"id": "PH-003", "severity": "block", "context": "儿童驻留类 (0-12)", "pH_min": 4.5, "pH_max": 7.5, "source": "GB 7916-2026 + 儿童化妆品技术指导原则"},
+        {"id": "PH-004", "severity": "block", "context": "儿童淋洗类 (0-12)", "pH_min": 4.5, "pH_max": 8.5},
+        {"id": "PH-005", "severity": "warn", "context": "婴幼儿尿布区", "pH_max": 8.5, "rationale": "低 pH 刺激尿布区皮肤, 需 ≥ 4.5 但允许偏碱到 8.5"},
+        {"id": "PH-006", "severity": "warn", "ingredient": "AHA", "context": "驻留类", "pH_required_min": 3.5, "pH_required_max": 4.0, "rationale": "驻留类 AHA 有效 pH < 4.0, 否则效果不佳"},
+        {"id": "PH-007", "severity": "warn", "ingredient": "BHA", "context": "驻留类", "pH_required_min": 3.0, "pH_required_max": 4.0, "rationale": "BHA 在 pH 3-4 最稳定有效"},
+        {"id": "PH-008", "severity": "block", "ingredient": "VITAMIN_C", "context": "L-Ascorbic Acid", "pH_required_min": 2.5, "pH_required_max": 3.5, "rationale": "L-抗坏血酸在 pH > 3.5 失活; < 2.5 刺激"}
+      ]
+    },
+    "concentration_limits": {
+      "description": "Max concentration for restricted ingredients (STSC 2015 + EU + FDA)",
+      "rules": [
+        {"id": "CONC-001", "ingredient": "RETINOL", "leave_on_max_pct": 0.05, "rinse_off_max_pct": 0.3, "source": "EU SCCS 2022"},
+        {"id": "CONC-002", "ingredient": "AHA", "leave_on_max_pct": 10, "rinse_off_max_pct": 20, "label": "≥ 10% 需 pH < 4"},
+        {"id": "CONC-003", "ingredient": "BHA_SALICYLIC_ACID", "leave_on_max_pct": 2, "rinse_off_max_pct": 3, "label": "≥ 1% 标签需警示"},
+        {"id": "CONC-004", "ingredient": "HYDROQUINONE", "max_pct": 0, "note": "中国禁用 (CN-禁用 2021 年第 74 号公告)"},
+        {"id": "CONC-005", "ingredient": "FORMALDEHYDE", "max_pct": 0, "note": "中国禁用 (甲醛), EU 限 0.2% 游离"},
+        {"id": "CONC-006", "ingredient": "METHYLISOTHIAZOLINONE", "max_pct": 0.01, "note": "EU 仅冲洗类, 2025 后中国禁驻留类", "source": "EU SCCS + NIFDC 2024"},
+        {"id": "CONC-007", "ingredient": "TRICLOSAN", "max_pct": 0, "note": "中国禁用 (含三氯生)"},
+        {"id": "CONC-008", "ingredient": "OXYBENZONE", "max_pct": 6, "note": "FDA 2020 建议 < 6%, 致敏"},
+        {"id": "CONC-009", "ingredient": "MINOXIDIL", "max_pct": 0, "note": "中国禁用 (护肤品), 药用限 2-5%"},
+        {"id": "CONC-010", "ingredient": "HYDROQUINONE_p_", "max_pct": 0, "note": "中国禁用 (氢醌 2021 年 74 号)"},
+        {"id": "CONC-011", "ingredient": "IODOPROPYNYL_BUTYLCARBAMATE", "max_pct": 0.02, "rinse_off_max_pct": 0.02, "label": "禁用 3 岁以下尿布区产品"},
+        {"id": "CONC-012", "ingredient": "METHYLCHLOROISOTHIAZOLINONE_METHYLISOTHIAZOLINONE", "max_pct": 0.0015, "note": "中国/欧盟限防腐剂"},
+        {"id": "CONC-013", "ingredient": "PHENOXYETHANOL", "max_pct": 1.0, "note": "中国准用防腐剂"},
+        {"id": "CONC-014", "ingredient": "TITANIUM_DIOXIDE", "children_max_pct": 25, "note": "GB 7916-2026 + 儿童指导原则"}
+      ]
+    },
+    "special_populations": {
+      "description": "Warnings for pregnant, infant, sensitive skin",
+      "rules": [
+        {"id": "POP-001", "severity": "block", "context": "孕妇", "ingredients": ["RETINOL", "TRETINOIN", "ADAPALENE", "TAZAROTENE", "ISOTRETINOIN"], "rationale": "维 A 类致畸, TGA Cat D / FDA Cat X"},
+        {"id": "POP-002", "severity": "block", "context": "孕妇", "ingredients": ["HYDROQUINONE"], "rationale": "美白剂经皮吸收, 致畸"},
+        {"id": "POP-003", "severity": "block", "context": "孕妇", "ingredients": ["MINOXIDIL"], "rationale": "致畸"},
+        {"id": "POP-004", "severity": "warn", "context": "孕妇", "ingredients": ["SALICYLIC_ACID", "BHA"], "rationale": "高剂量致畸, 低浓度 (<2%) 安全"},
+        {"id": "POP-005", "severity": "warn", "context": "孕妇", "ingredients": ["RETINYL_PALMITATE", "RETINOL"], "rationale": "FDA 2014 评估, 风险未明"},
+        {"id": "POP-006", "severity": "block", "context": "0-3岁婴幼儿", "ingredients": ["IODOPROPYNYL_BUTYLCARBAMATE", "SALICYLIC_ACID", "SILVER_CHLORIDE_ON_TITANIUM_DIOXIDE"], "rationale": "婴幼儿化妆品技术指导原则"},
+        {"id": "POP-007", "severity": "block", "context": "婴幼儿", "ingredients": ["RETINOL"], "rationale": "代谢能力差, 吸收 > 成人"},
+        {"id": "POP-008", "severity": "block", "context": "婴幼儿", "ingredients": ["METHYLISOTHIAZOLINONE", "FORMALDEHYDE_RELEASERS"], "rationale": "婴幼儿致敏率显著高于成人"},
+        {"id": "POP-009", "severity": "warn", "context": "敏感肌", "ingredients": ["FRAGRANCE", "CITRONELLOL", "GERANIOL", "EUGENOL", "CINNAMAL", "CINNAMYL_ALCOHOL", "ISOEUGENOL", "BENZYL_SALICYLATE", "LINALOOL", "D-LIMONENE"], "rationale": "26 种已知致敏香料 (EU 26 allergens)"},
+        {"id": "POP-010", "severity": "warn", "context": "敏感肌", "ingredients": ["DENATURED_ALCOHOL"], "rationale": "高含量破坏屏障"}
+      ]
+    },
+    "regulatory_region": {
+      "description": "Multi-region regulatory differences (CN / EU / US / KR / JP / ASEAN)",
+      "rules": [
+        {"id": "REG-CN-001", "region": "CN", "ingredient": "HYDROQUINONE", "status": "禁用 (2021 年第 74 号公告)"},
+        {"id": "REG-CN-002", "region": "CN", "ingredient": "RETINOIC_ACID", "status": "禁用 (2021 年第 74 号公告)"},
+        {"id": "REG-CN-003", "region": "CN", "ingredient": "CANNABIDIOL", "status": "禁用 (2021 年第 74 号公告 + 2025 年第 61 号动态调整)"},
+        {"id": "REG-CN-004", "region": "CN", "ingredient": "BENZOYL_PEROXIDE", "status": "允许 (中国非限用非禁用, 浓度自定)"},
+        {"id": "REG-EU-001", "region": "EU", "ingredient": "BENZOYL_PEROXIDE", "status": "限用, 游离/释放 form ≤ 2% 面, ≤ 3% 身"},
+        {"id": "REG-EU-002", "region": "EU", "ingredient": "BHT", "max_pct": 0.001, "status": "Annex III, 仅冲洗"},
+        {"id": "REG-EU-003", "region": "EU", "ingredient": "LILIAL", "status": "禁用 2022-03 (CMR 1B)"},
+        {"id": "REG-US-001", "region": "US", "ingredient": "11_INGREDIENTS", "status": "FDA 11 禁用 (bithionol, 氯氟卡班, 卤化 salicylanilides, MEK 等)"},
+        {"id": "REG-US-002", "region": "US", "ingredient": "OXYBENZONE", "max_pct": 6, "status": "FDA 2020 建议"},
+        {"id": "REG-US-003", "region": "US", "ingredient": "PFAS_PFOA", "max_pct": 0, "status": "FDA 2025 提案, EU 限用"},
+        {"id": "REG-KR-001", "region": "KR", "ingredient": "ALLANTOIN", "status": "限用, 浓度 < 0.5%"},
+        {"id": "REG-ASEAN-001", "region": "ASEAN", "ingredient": "1,870_substances", "status": "禁用 (Annex II)"},
+        {"id": "REG-JP-001", "region": "JP", "ingredient": "HYDROQUINONE", "max_pct": 2, "status": "药用 2% 限用, 护肤品禁用"}
+      ]
+    },
+    "synbio_collagen": {
+      "description": "Synthetic biology collagen safety rules",
+      "rules": [
+        {"id": "SYB-001", "ingredient": "RECOMBINANT_HUMAN_COLLAGEN_III", "label_requirement": "III 类医械 (注射用需医械证), 不得作为护肤品原料"},
+        {"id": "SYB-002", "ingredient": "RECOMBINANT_COLLAGEN", "label_requirement": "符合 YY/T 1888-2023, 标注型别 (I/III/IV/XVII)"},
+        {"id": "SYB-003", "ingredient": "RH-OVIDUCAL_POTEIN", "label_requirement": "中国 NMPA 2023-08 起单独管理 (酸性乳清蛋白/重组人溶菌酶等)"},
+        {"id": "SYB-004", "ingredient": "RECOMBINANT_HYALURONIC_ACID", "label_requirement": "分子量标注 (5kDa 透皮 / 50kDa 表皮 / 1000kDa 表皮屏障)"},
+        {"id": "SYB-005", "ingredient": "SYNBIO_NMN_NR_NMN", "label_requirement": "中国 2024 新原料备案 3 年监测期, 不得作医疗宣称"}
+      ]
+    },
+    "fda_event_red_flags": {
+      "description": "FDA CAERS top-reported ingredients/products (openFDA 85,511 events 2024)",
+      "rules": [
+        {"id": "FDA-001", "ingredient": "TALC_BASED_POWDER", "event_count_2024": 71813, "rationale": "J&J 滑石粉 84% of events, 卵巢/间皮瘤"},
+        {"id": "FDA-002", "ingredient": "CLEANSER_AND_SOAP", "event_count_2024": 4521, "rationale": "pH 偏离 + SLS 浓度"},
+        {"id": "FDA-003", "ingredient": "MOISTURIZER", "event_count_2024": 3450, "rationale": "对羟基苯甲酸酯 + 香料致敏"},
+        {"id": "FDA-004", "ingredient": "HAIR_CARE", "event_count_2024": 2130, "rationale": "MIT/CMIT 防腐剂"},
+        {"id": "FDA-005", "ingredient": "MAKEUP_FOUNDRY", "event_count_2024": 1875, "rationale": "滑石粉 + 重金属 (Pb/As)"},
+        {"id": "FDA-006", "demographic": "95.7% female", "rationale": "需特别关注女性/孕产期产品"}
+      ]
+    }
+  },
+  "rule_stats": {
+    "total_rules": 65,
+    "block_severity": 14,
+    "warn_severity": 33,
+    "info_severity": 0,
+    "by_category": {
+      "compatibility": 15,
+      "ph_safety": 8,
+      "concentration_limits": 14,
+      "special_populations": 10,
+      "regulatory_region": 13,
+      "synbio_collagen": 5,
+      "fda_event_red_flags": 6
+    }
+  }
+}

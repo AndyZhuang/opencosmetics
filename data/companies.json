@@ -1,0 +1,163 @@
+{
+  "_meta": {
+    "description": "Synthetic biology cosmetic ingredient companies — public data from HK/A-share filings (招股书/年报/募集说明书)",
+    "source": "HKEX disclosure (巨子生物 02367.HK), 北交所 (锦波生物 920982.BJ), 上交所 (华熙生物 688363.SH), 新三板 (创健医疗 873593.NQ)",
+    "currency": "CNY (¥, 亿元)",
+    "data_year": "2024 全年 + 2025 半年报"
+  },
+  "companies": [
+    {
+      "id": "juzi-bio",
+      "ticker": "02367.HK",
+      "name_cn": "巨子生物",
+      "name_en": "Giant Biogene Holding",
+      "exchange": "港交所",
+      "ipo_date": "2022-11-04",
+      "founded": "2000",
+      "hq": "西安",
+      "category": "重组胶原蛋白 (Recombinant Collagen)",
+      "tech_platform": "合成生物学 — 重组人胶原蛋白 (I/III/类人/Mini小分子肽)",
+      "products": [
+        {"name": "重组I型人胶原蛋白", "type": "core ingredient", "application": "皮肤修护"},
+        {"name": "重组III型人胶原蛋白", "type": "core ingredient", "application": "抗皱紧致"},
+        {"name": "重组类人胶原蛋白", "type": "core ingredient", "application": "创面修复"},
+        {"name": "mini小分子重组胶原蛋白肽", "type": "core ingredient", "application": "透皮吸收"},
+        {"name": "稀有人参皂苷 Rk3/Rh4/Rk1/Rg5/CK (5种)", "type": "byproduct", "application": "功能性食品/护肤品"}
+      ],
+      "brands": ["可复美 (Comfy)", "可丽金 (Collgene)", "可预 (Keenon)", "欣苷", "参苷"],
+      "financials_2024": {
+        "revenue_cny_b": 55.39,
+        "revenue_growth_yoy": 0.572,
+        "net_profit_cny_b": 21.52,
+        "gross_margin": 0.821,
+        "key_brand_revenue_pct": 0.82,
+        "key_brand_name": "可复美"
+      },
+      "channels": ["1,700+ 公立医院", "3,000+ 私立医院/诊所", "15万+ 药房"],
+      "yoy_history": [
+        {"year": 2022, "revenue_b": 23.64, "growth": null},
+        {"year": 2023, "revenue_b": 35.24, "growth": 0.491},
+        {"year": 2024, "revenue_b": 55.39, "growth": 0.572},
+        {"year": "2025E", "revenue_b": 70.0, "growth": 0.264}
+      ],
+      "regulatory": ["重组胶原蛋白 YY/T 1888-2023 起草单位", "3 张 III 类医疗器械注册证 (II类敷料)", "FDA 510(k) pending"],
+      "ticker_history": "上市以来股价最高 85.14 港元 (2025-05-20), 11/12 报 39.32 港元 (-55%)"
+    },
+    {
+      "id": "jinbo-bio",
+      "ticker": "920982.BJ",
+      "name_cn": "锦波生物",
+      "name_en": "Jinbo Bio-Pharmaceutical",
+      "exchange": "北交所",
+      "ipo_date": "2023-07-20",
+      "founded": "2008",
+      "hq": "山西太原",
+      "category": "重组人源化胶原蛋白 (Recombinant Humanized Collagen)",
+      "tech_platform": "结构生物学 + 蛋白质理性设计 + 合成生物学",
+      "products": [
+        {"name": "薇旖美 — 重组III型人源化胶原蛋白冻干纤维 (2/4/6/8/10 mg 规格)", "type": "flagship product", "application": "面部皱纹纠正 (III 类医械)", "launch": "2021-06"},
+        {"name": "注射用重组III型人源化胶原蛋白溶液", "type": "类械", "application": "皮肤修复 (III 类医械 2023-08)", "launch": "2023-08"},
+        {"name": "注射用重组III型人源化胶原蛋白凝胶 (自组装自交联)", "type": "类械", "application": "面部填充 (III 类医械 2025-04)", "launch": "2025-04"},
+        {"name": "重源/同频 — 重组胶原蛋白护肤品", "type": "consumer brand", "application": "次抛精华/面膜/面霜"},
+        {"name": "抗 HPV 生物蛋白敷料 (酸酐化牛β-乳球蛋白)", "type": "biomedical", "application": "妇科敷料 (II 类医械)"}
+      ],
+      "brands": ["薇旖美 (Viyouth)", "重源 (Chongyuan)", "ProtYouth", "同频 (Tongpin)"],
+      "financials_2024": {
+        "revenue_cny_b": 14.43,
+        "revenue_growth_yoy": 0.849,
+        "net_profit_cny_b": 7.32,
+        "net_profit_growth_yoy": 1.443,
+        "gross_margin": 0.9202,
+        "key_product_revenue_pct": 0.78,
+        "key_product_name": "薇旖美 单一材料医疗器械",
+        "wy_sales_volume_2024": 1242800,
+        "wy_cumulative_since_2021": 2000000
+      },
+      "milestones": [
+        "2025-04: 第 3 张 III 类医械注册证 (注射用凝胶)",
+        "2025-04: 四川大学联合牵头 ISO/TC194 国际标准立项",
+        "2025-12: 养生堂 20 亿战略入股 (成为 5%+ 股东)",
+        "2026 募资 11.5 亿元建 FAST 数据库 (AI+合成生物)"
+      ],
+      "yoy_history": [
+        {"year": 2020, "revenue_b": 1.61, "growth": null},
+        {"year": 2021, "revenue_b": 2.33, "growth": 0.447},
+        {"year": 2022, "revenue_b": 3.90, "growth": 0.674},
+        {"year": 2023, "revenue_b": 7.80, "growth": 1.000},
+        {"year": 2024, "revenue_b": 14.43, "growth": 0.849}
+      ],
+      "regulatory": ["YY/T 1888-2023 起草单位", "国内唯一 3 张重组胶原 III 类医械注册证", "出口越南 (首个境外重组胶原 III 类医械 2024-11)"]
+    },
+    {
+      "id": "huaxi-bio",
+      "ticker": "688363.SH",
+      "name_cn": "华熙生物",
+      "name_en": "Bloomage Biotech",
+      "exchange": "上交所科创板",
+      "ipo_date": "2019-11-06",
+      "founded": "2000",
+      "hq": "北京",
+      "category": "透明质酸 (Hyaluronic Acid) + 合成生物",
+      "tech_platform": "微生物发酵法生产透明质酸 (全球最大产能)",
+      "products": [
+        {"name": "透明质酸钠 (食品级/医药级/化妆品级)", "type": "core", "production_capacity_kg_2024": "770,000+ kg/yr"},
+        {"name": "重组人源胶原蛋白 (III/IV/XVII 型, 5 项发明专利 2025-08)", "type": "expanding", "application": "胶原水光 (III 类医械 临床试验中)"},
+        {"name": "GABA (γ-氨基丁酸) / 麦角硫因 / 依克多因", "type": "synbio ingredients", "application": "功效护肤/医药"},
+        {"name": "润熙泉 (Runxiquan) 胶原蛋白品牌", "type": "consumer brand", "status": "已清空官旗 (2025 双十一后退出)"}
+      ],
+      "brands": ["润百颜 (Runbaiyan)", "夸迪 (Quadha)", "米蓓尔 (MedRepair)", "BIOMESO", "润熙泉 (已撤)"],
+      "financials_2024": {
+        "revenue_cny_b": 53.71,
+        "revenue_growth_yoy": -0.116,
+        "gross_margin": 0.745,
+        "rd_investment_pct": 0.07
+      },
+      "synbio_strategy": "从'透明质酸单品类'转向'合成生物全品类' (2025), 8 项重组胶原专利布局",
+      "yoy_history": [
+        {"year": 2021, "revenue_b": 49.48, "growth": 0.876},
+        {"year": 2022, "revenue_b": 63.59, "growth": 0.285},
+        {"year": 2023, "revenue_b": 60.76, "growth": -0.044},
+        {"year": 2024, "revenue_b": 53.71, "growth": -0.116}
+      ]
+    },
+    {
+      "id": "chuangjian",
+      "ticker": "873593.NQ",
+      "name_cn": "创健医疗",
+      "name_en": "Aoyang Health",
+      "exchange": "新三板 (拟北交所)",
+      "ipo_date": "2024-11 新三板挂牌",
+      "founded": "2015",
+      "hq": "江苏泰州",
+      "category": "重组胶原蛋白原料 (B2B)",
+      "tech_platform": "重组 I/II/III 型胶原蛋白全产业链",
+      "products": [
+        {"name": "重组 III 型胶原蛋白 (医疗器械原料)", "type": "B2B 原料", "application": "下游 III 类医械厂商"},
+        {"name": "重组 I/II/IV/XVII 型胶原蛋白", "type": "R&D pipeline", "application": "在研"}
+      ],
+      "regulatory": [
+        "重组 III 型胶原蛋白植入剂 (III 类医械 注册申报中)",
+        "重组 III 型胶原蛋白冻干纤维 (III 类医械 注册申报中)"
+      ],
+      "financials_2024": {
+        "revenue_cny_b": 0.288,
+        "revenue_growth_yoy": 0.018
+      },
+      "positioning": "'重组胶原蛋白第一原料商' — B2B 供应医疗器械/化妆品厂商"
+    }
+  ],
+  "market_sizing": {
+    "source": "Frost & Sullivan + 弗若斯特沙利文",
+    "china_recombinant_collagen_market_2022_b": 18.5,
+    "china_recombinant_collagen_market_2025E_b": 58.57,
+    "china_recombinant_collagen_market_2027E_b": 108.3,
+    "china_recombinant_collagen_market_2030E_b": 219.38,
+    "cagr_2022_2030": 0.4243,
+    "notes": "重组胶原蛋白市场 2022→2030 年均复合增长率 42.4%, 中国占全球市场 70%+"
+  },
+  "upstream_competitors": [
+    "江山聚源 (江苏) — 仿生重组功能蛋白",
+    "百普赛斯 (301080.SZ) — 重组蛋白试剂 (医美/医械外延)",
+    "诺唯赞 (688105.SH) — 体外诊断/抗体/原料"
+  ]
+}

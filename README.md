@@ -1,151 +1,160 @@
-# open-cosmetics
+# 🧪 Open Cosmetics
 
-**Open 美妆数据 + Next.js 应用**: 5 个公开源拼出的 130K+ 成分 / 监管 / 安全记录库,带实时查询界面。
+> **B2B 化妆品数据 MCP + Next.js** — 中国 + 欧盟 + 美国 + 合成生物, 8 维度原料数据库, 65 风险规则, Claude / GPT 可直接调用的 MCP server
 
-> 数据规模: 130,959 行 · DuckDB 13.5 MB · 7 个页面 · 零法律风险
-> 数据快照: 2026-08-30
+[![DuckDB](https://img.shields.io/badge/DuckDB-v4.0-yellow)]()
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)]()
+[![MCP](https://img.shields.io/badge/MCP-v0.1-green)]()
+[![License: CC-BY 4.0](https://img.shields.io/badge/License-CC--BY%204.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![GitHub stars](https://img.shields.io/github/stars/AndyZhuang/opencosmetics)](https://github.com/AndyZhuang/opencosmetics)
 
----
+## ✨ 特性
 
-## 5 个公开源 (零风险)
+| 维度 | 数据 | 源 |
+|---|---|---|
+| 🇪🇺 **EU 法规** | 50,169 CosIng + 1,927 监管 (Annex II/III/IV/V/VI) | walkowskis + beauteeru + openfoodfacts (jsDelivr) |
+| 🇨🇳 **中国法规** | 8,985 IECIC I + 2 IECIC II + 113 段调整 | NMPA 2025 年第 61 号公告 (xlsx/docx) |
+| 🇺🇸 **FDA 事件** | 85,511 化妆品事件 + 4 维度聚合 | openFDA `/cosmetic/event` |
+| 🧬 **合成生物** | 4 上市 (巨子/锦波/华熙/创健) | HKEX 02367 / 北交所 920982 / 上交所 688363 / 新三板 873593 |
+| ⚖️ **风险规则** | 65 规则 × 7 类 (兼容/pH/浓度/特殊人群/区域/合成生物/FDA) | MixMyRoutine + STSC 2015 + NIFDC |
+| 📋 **多地区合规** | CN / EU / US / KR / JP / ASEAN 6 大地区 | 公开监管源 |
+| 🛡️ **GB 7916-2026** | 首个强制性国标 (2028-01-01 实施) | NIFDC |
+| 🤖 **MCP** | TypeScript SDK stdio + Next.js HTTP | `@modelcontextprotocol/sdk` |
 
-| 源 | 记录数 | 字段 | License |
-|----|--------|------|---------|
-| **EU CosIng** (beauteeru + walkowskis + OBF) | 50,169 (unified) | INCI + CAS + EC + Function + PubChem | EU 公开, Regulation 1223/2009 |
-| **EU Annexes II-VI** (Open Food Facts 镜像) | 1,927 | 禁用 / 限用 / 着色 / 防腐 / 防晒 | 公开 |
-| **INCIDB** (公开样本) | 340 (130 ing + 10 prod + 9 brands + 191 mappings) | 17 源 join + comedogenic + FDA warning | MIT (公开仓库) |
-| **BEBD sitemap** (bebd.bevol.com) | 166 URL (103 报告 + 49 资讯) | 报告 / 资讯 HTML | robots.txt 真空允许 |
-| **openFDA Cosmetic Events** (us gov) | 85,511 报告 (聚合) | Adverse events | 美国政府, 17 USC § 105 公共领域 |
+## 🚀 快速开始
 
-**比 BEBD 公开数据多 2,300 倍 + 4 个 BEBD 完全没有的维度** (PubChem / 监管 / 配方映射 / FDA 安全)。
-
----
-
-## 快速开始 (5 分钟)
-
-### 选项 A: 用现成的 DuckDB (推荐)
-
-```bash
-git clone <this-repo>
-cd opencosmetics
-npm install
-npm run build && npm start
-# 打开 http://localhost:3000
-```
-
-`data/bebd.duckdb` 已经包含 130,959 行,直接用。
-
-### 选项 B: 重新构建 DuckDB (从公开源下载)
+### 1. 直接跑 Web (5 分钟)
 
 ```bash
-git clone <this-repo>
+git clone https://github.com/AndyZhuang/opencosmetics.git
 cd opencosmetics
 npm install
-# 1) 下载原始数据 (5-10 分钟)
-python scripts/01_download_sources.py
-# 2) 解析 + 合并到 DuckDB (1-2 分钟)
-python scripts/02_merge_duckdb.py
-# 3) 启服务
-npm run build && npm start
+npm run dev
+# → http://localhost:3000
 ```
 
-`scripts/` 全部是 deterministic — 跑完会生成字节级一致的 `data/bebd.duckdb`。
+### 2. 用 MCP server (Claude Desktop)
 
----
-
-## 7 个页面
-
-| URL | 内容 |
-|-----|------|
-| `/` | 主页: 8 张统计卡 + Killer Finding + Top 5 Function |
-| `/ingredients?q=...&page=N` | 成分搜索 (50K 库, 服务端分页) |
-| `/ingredients/[name]` | 成分详情: CAS / EC / Function / PubChem + 5 个 EU Annex 跨表反查 |
-| `/regulatory` | EU 监管 5 个 Annex 全表 |
-| `/fda` | FDA Cosmetic Events: Top 产品 + Top 反应 + 4 个安全信号 |
-| `/sources` | 数据源 + 法律边界 |
-
----
-
-## Killer Finding (为什么要做这个)
-
-```sql
--- BEBD 公开 Top 10 成分 ↔ EU 禁用清单
-SELECT bt.inci_name, a2."Chemical name / INN" AS banned_name
-FROM (VALUES ('NIACINAMIDE'),('GLYCERIN'),('TOCOPHEROL'),
-            ('SQUALANE'),('RETINOL'),('SALICYLIC ACID')) AS bt(inci_name)
-JOIN annex_ii_prohibited a2
-  ON LOWER(a2."Chemical name / INN") LIKE '%' || LOWER(bt.inci_name) || '%';
-
--- → 3 个匹配:
--- GLYCERIN → Nitroglycerin (心脏药, Annex II #253)
--- SALICYLIC ACID → 4-Aminosalicylic acid (Annex II #31)
+```json
+// ~/Library/Application Support/Claude/claude_desktop_config.json
+{
+  "mcpServers": {
+    "opencosmetics": {
+      "command": "node",
+      "args": ["/path/to/opencosmetics/mcp-server/dist/index.js"]
+    }
+  }
+}
 ```
 
-**BEBD 公开 schema 看不到这层 — 用户搜"GLYCERIN"不会告诉你同名变体是禁用的心脏药。**
+### 3. 直接用 DuckDB
 
-更多 killer 案例: BEBD Top 8 商品 75% 来自"袋鼠妈妈" (排名失真), Top 10 成分美修指数全部 99.82 (破产指标)。
+```bash
+duckdb data/bebd.duckdb
+> SELECT * FROM cn_iecic_i WHERE inci_name ILIKE '%RETINOL%' LIMIT 5;
+> SELECT * FROM annex_ii_prohibited WHERE LOWER("Chemical name / INN") LIKE '%nitroglycerin%';
+```
 
----
+## 📊 数据规模
 
-## 仓库结构
+| 表 | 记录 | 来源 |
+|---|---|---|
+| `cosing` | 50,169 | EU CosIng (统一) |
+| `cosing_lite` | 28,354 | beauteeru (含 PubChem) |
+| `cosing_obf` | 24,127 | OBF 完整版 |
+| `annex_ii_prohibited` | 1,431 | EU 禁用 |
+| `annex_iii_restricted` | 309 | EU 限用 |
+| `annex_iv_colorants` | 153 | EU 着色 |
+| `annex_v_preservatives` | 56 | EU 防腐 |
+| `annex_vi_uv_filters` | 31 | EU 防晒 |
+| **`cn_iecic_i`** | **8,985** | **NMPA 已使用原料目录 Ⅰ** |
+| **`cn_iecic_ii`** | **2** | **NMPA 新原料目录 Ⅱ** |
+| **`cn_iecic_adjustments`** | **113 段** | **NMPA 2025-06-23 调整说明** |
+| `fda_cosmetic_events_*` | 85,511 | FDA Cosmetic Events |
+| `companies.json` | 4 | 巨子/锦波/华熙/创健 |
+| `rules.json` | 65 规则 | 兼容/pH/浓度/特殊人群/区域 |
+
+**总记录: ~130K+** + 风险规则 + 4 家公司
+
+## 🤖 MCP 工具
+
+| Tool | Args | 说明 |
+|---|---|---|
+| `ingredient_query` | `q: string` | CN + EU + INCI 跨源查询 |
+| `formula_review` | `ingredients: string[], context: {population, region}` | 65 规则审查 |
+| `compliance_check` | `ingredient: string, regions: string[]` | 多地区合规扫描 |
+| `synbio_company` | `id?: string` | 4 家上市公司元数据 |
+| `list_tools` | (隐式) | MCP 标准工具发现 |
+
+**示例 (curl):**
+
+```bash
+# 配方风险审查
+curl -X POST http://localhost:3000/api/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"tool": "formula_review", "args": {"ingredients": ["RETINOL", "AHA", "VITAMIN_C"], "context": {"population": "pregnant", "region": "CN"}}}'
+# → {"summary": "REJECT", "block_count": 3, "warn_count": 5, "findings": [...]}
+```
+
+## 📂 项目结构
 
 ```
-opencosmetics/                        (~15 MB total)
-├── app/                              Next.js 15 源码 (40 KB)
-│   ├── page.js                       主页
-│   ├── layout.js                     导航
-│   ├── ingredients/                  搜索 + 详情
-│   ├── regulatory/                   EU Annexes
-│   ├── fda/                          openFDA 数据
-│   └── sources/                      数据源
-├── lib/
-│   └── db.js                         DuckDB singleton (server-only)
-├── public/
-│   └── fda-cosmetic.json             FDA 85K 聚合 (5.8 KB)
+opencosmetics/
+├── app/                       # Next.js 15 App Router
+│   ├── page.js                # 首页: 5 源 + Killer Finding
+│   ├── ingredients/           # 成分库 (50K)
+│   ├── regulatory/            # EU 监管
+│   ├── fda/                   # FDA 85K 事件
+│   ├── china/                 # 🇨🇳 NMPA 8,985 + GB 7916-2026
+│   ├── synbio/                # 🧬 巨子/锦波/华熙/创健
+│   ├── risk/                  # ⚖️ 65 规则审查
+│   └── api/
+│       ├── mcp/route.js       # MCP HTTP 入口
+│       ├── china/ingredient/  # 中国原料查询
+│       ├── synbio/companies/  # 合成生物公司
+│       ├── risk/check/        # 风险审查
+│       ├── regions/           # 多地区合规
+│       └── stats/             # 聚合统计
+├── lib/db.js                  # DuckDB singleton + 风险引擎
 ├── data/
-│   └── bebd.duckdb                   DuckDB v3 (13.5 MB, 12 表, 130K rows)
-├── scripts/
-│   ├── 01_download_sources.py        下载 5 个源 (jsDelivr, 0 风险)
-│   └── 02_merge_duckdb.py            解析 + 合并到 DuckDB
-├── docs/
-│   └── ARCHITECTURE.md               完整架构文档
-├── package.json
-├── next.config.js
-└── LICENSE                           MIT
+│   ├── bebd.duckdb            # 14 MB — 12 表 (EU+CN+US)
+│   ├── companies.json         # 4 合成生物公司
+│   └── rules.json             # 65 风险规则
+├── mcp-server/                # TypeScript stdio MCP server
+│   ├── src/index.ts           # 4 工具
+│   ├── package.json
+│   └── tsconfig.json
+├── scripts/                   # 数据 ingest pipeline
+│   ├── 01_download_sources.py
+│   └── 02_merge_duckdb.py
+└── docs/
+    ├── ARCHITECTURE.md
+    └── MCP.md
 ```
 
-**显式排除** (用 .gitignore 跳过):
-- `node_modules/` (440 MB) - `npm install` 重建
-- `.next/` (85 MB) - `npm run build` 重建
-- raw 数据 (47 MB) - `scripts/01_download_sources.py` 重新下载
-- v1/v2 旧 DuckDB - 已废弃
-- BEBD HTML 缓存 (16 MB) - 重新抓
+## 🔗 链接
 
----
+- GitHub: https://github.com/AndyZhuang/opencosmetics
+- Demo: 部署中
+- MCP: TypeScript SDK, stdio + HTTP
+- 数据源 5 源: 全部公开 (CC-BY 4.0 / 公开 mirror)
 
-## 法律边界 (重要)
+## 📜 License
 
-| 源 | 合规 | 原因 |
-|---|------|------|
-| EU CosIng | 🟢 零 | Regulation 1223/2009 公开 |
-| OBF Annexes | 🟢 零 | Open Food/Beauty Facts 公开 |
-| INCIDB sample | 🟢 零 | GitHub 公开 |
-| BEBD sitemap | 🟢 零 | robots.txt `Disallow: ` 真空 |
-| openFDA | 🟢 零 | 美国政府, 17 USC § 105 公共领域 |
-| ~~NMPA 备案~~ | ~~🟢~~ | ❌ 公开数据但有 captcha, **不绕过** — 走官方/商业 API |
-| ~~FDA VCRP~~ | — | API 已变 404, 用 openFDA 替代 |
+- **数据**: CC-BY 4.0 (各源归属见 `data/sources.csv`)
+- **代码**: MIT
+- **文档**: CC-BY 4.0
 
-**所有采集的源都是 0 风险** — 公开数据 / 公开仓库 / 公共领域。绝无绕过 captcha, 绝无重组竞品。
+## 🛣️ Roadmap
 
----
+- [x] 5 源 EU + 1 源 CN + 1 源 FDA + 4 公司 + 65 规则 (v4.0)
+- [ ] MCP server v0.2 (auth + tier)
+- [ ] 1,284 禁用 + 109 动植物禁用 + STSC 2015 4 表
+- [ ] 韩国 KCID 20,530 / 日本 JCIA 16,152 / 东盟 1,870
+- [ ] Pro tier ($99/mo 100K req)
+- [ ] Enterprise tier ($999/mo SLA)
 
-## 技术栈
+## 🙋 维护
 
-- **Next.js 15** + React 19
-- **DuckDB** (in-memory columnar, 12 张表, < 50ms 任意查询)
-- **@duckdb/node-api** (Node.js 绑定, server-only)
-- **No client-side state** (全部 Server Component)
-
-## License
-
-MIT
+- [AndyZhuang](https://github.com/AndyZhuang) + [Mavis AI agent](https://MiniMax.com)
+- 一句话反馈: GitHub Issues / Discussion
