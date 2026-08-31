@@ -76,3 +76,5 @@ mcp-server/dist/
 mcp-server/node_modules/
 .next/
 node_modules/
+
+data/bebd_v4.duckdb

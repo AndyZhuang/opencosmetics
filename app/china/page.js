@@ -1,14 +1,17 @@
 import { query, queryOne } from "../../lib/db";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { t, getLangFromCookies } from "../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "中国化妆品法规 — IECIC I/II + 调整说明",
+  title: "China Cosmetics Regulatory — IECIC I/II + Adjustments",
   description: "NMPA 国家药监局 化妆品原料目录 8,985 条 + 2025-06-23 调整说明",
 };
 
 export default async function ChinaPage() {
+  const lang = getLangFromCookies(cookies().toString());
   // Stats
   const stats = await query(`
     SELECT
@@ -27,25 +30,35 @@ export default async function ChinaPage() {
     ORDER BY id LIMIT 6
   `);
 
-  // 中国法规趋势: 2025-2026 重要更新
+  // 中国法规趋势
   const milestones = [
-    { date: "2025-06-23", event: "NMPA 2025 年第 61 号公告: IECIC 拆分为 Ⅰ (8,985) + Ⅱ (动态纳入新原料)" },
-    { date: "2026-08-06", event: "GB 7916-2026《化妆品 安全通用要求》发布, 2028-01-01 实施 (首个强制性国标)" },
-    { date: "2026-08-25", event: "首项检测: 眼周/口唇/儿童菌落总数限量比普通产品严 10×" },
-    { date: "2026-08-20", event: "IECIC 第 5 次动态调整 (月桂酰丙氨酸等 3 个新原料 → IECIC Ⅱ)" },
-    { date: "2026-05-17", event: "NMPA 批准雪莲花愈伤组织粉 (大连普瑞康) 列入 IECIC Ⅱ" },
+    { date: "2025-06-23", event: lang === "en"
+      ? "NMPA 2025 #61: IECIC split into I (8,985) + II (dynamic new ingredients)"
+      : "NMPA 2025 年第 61 号公告: IECIC 拆分为 Ⅰ (8,985) + Ⅱ (动态纳入新原料)" },
+    { date: "2026-08-06", event: lang === "en"
+      ? "GB 7916-2026 published, effective 2028-01-01 (first mandatory national standard)"
+      : "GB 7916-2026《化妆品 安全通用要求》发布, 2028-01-01 实施 (首个强制性国标)" },
+    { date: "2026-08-25", event: lang === "en"
+      ? "First test: eye/lip area + children colony limit 10x stricter than regular products"
+      : "首项检测: 眼周/口唇/儿童菌落总数限量比普通产品严 10×" },
+    { date: "2026-08-20", event: lang === "en"
+      ? "IECIC 5th dynamic adjustment (3 new ingredients like Lauroyl Alanine → IECIC II)"
+      : "IECIC 第 5 次动态调整 (月桂酰丙氨酸等 3 个新原料 → IECIC Ⅱ)" },
+    { date: "2026-05-17", event: lang === "en"
+      ? "NMPA approved Saussurea involucrata callus powder (Dalian Purecare) into IECIC II"
+      : "NMPA 批准雪莲花愈伤组织粉 (大连普瑞康) 列入 IECIC Ⅱ" },
   ];
 
   // 8 种危害物 GB 7916-2026 限量
   const heavyMetals = [
-    { substance: "铅 Pb", limit: "< 10 mg/kg", note: "重金属总量" },
-    { substance: "砷 As", limit: "< 1 mg/kg", note: "微量元素" },
-    { substance: "汞 Hg", limit: "< 4 mg/kg", note: "微量元素" },
-    { substance: "镉 Cd", limit: "(Cr/Cd/Cu/Mo/Fe/Ni) ≤ 50 mg/kg", note: "微量元素" },
-    { substance: "甲醇 (残留)", limit: "按需监测", note: "特定原料风险" },
-    { substance: "二噁烷", limit: "按需监测", note: "特定原料风险" },
-    { substance: "石棉", limit: "禁用", note: "滑石粉风险" },
-    { substance: "苯", limit: "≤ 2 mg/kg", note: "卡波姆工艺残留" },
+    { substance: lang === "en" ? "Lead (Pb)" : "铅 Pb", limit: "< 10 mg/kg", note: lang === "en" ? "Total heavy metal" : "重金属总量" },
+    { substance: lang === "en" ? "Arsenic (As)" : "砷 As", limit: "< 1 mg/kg", note: lang === "en" ? "Trace element" : "微量元素" },
+    { substance: lang === "en" ? "Mercury (Hg)" : "汞 Hg", limit: "< 4 mg/kg", note: lang === "en" ? "Trace element" : "微量元素" },
+    { substance: lang === "en" ? "Cadmium (Cd)" : "镉 Cd", limit: lang === "en" ? "(Cr/Cd/Cu/Mo/Fe/Ni) ≤ 50 mg/kg" : "(Cr/Cd/Cu/Mo/Fe/Ni) ≤ 50 mg/kg", note: lang === "en" ? "Trace element" : "微量元素" },
+    { substance: lang === "en" ? "Methanol (residual)" : "甲醇 (残留)", limit: lang === "en" ? "On-demand monitoring" : "按需监测", note: lang === "en" ? "Specific ingredient risk" : "特定原料风险" },
+    { substance: lang === "en" ? "Dioxane" : "二噁烷", limit: lang === "en" ? "On-demand monitoring" : "按需监测", note: lang === "en" ? "Specific ingredient risk" : "特定原料风险" },
+    { substance: lang === "en" ? "Asbestos" : "石棉", limit: lang === "en" ? "Banned" : "禁用", note: lang === "en" ? "Talc powder risk" : "滑石粉风险" },
+    { substance: lang === "en" ? "Benzene" : "苯", limit: "≤ 2 mg/kg", note: lang === "en" ? "Carbomer process residual" : "卡波姆工艺残留" },
   ];
 
   // IECIC I 搜索 (top 5 个示例)
@@ -60,24 +73,24 @@ export default async function ChinaPage() {
   return (
     <div>
       <h1 style={{ fontSize: "32px", margin: "0 0 8px 0" }}>
-        🇨🇳 中国化妆品法规数据
+        {t("china.title", lang)}
         <span style={{ fontSize: "16px", color: "var(--muted)", marginLeft: "12px" }}>
-          NMPA 2025 年第 61 号公告 + STSC 2015 + GB 7916-2026
+          {t("china.subtitle", lang)}
         </span>
       </h1>
       <p style={{ color: "var(--muted)" }}>
-        2025-06-23 NMPA 将 IECIC 拆分为 Ⅰ + Ⅱ 两个清单; 2026-08-06 GB 7916-2026 首个强制性国标发布 (2028-01-01 实施)。
+        {t("china.tagline", lang)}
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", margin: "24px 0" }}>
-        <Stat num={s.iecic_i.toLocaleString()} label="IECIC Ⅰ (已使用)" color="var(--green)" />
-        <Stat num={s.iecic_ii.toLocaleString()} label="IECIC Ⅱ (新原料)" />
-        <Stat num={s.adjustments.toLocaleString()} label="调整说明 (2025-06-23)" color="var(--orange)" />
-        <Stat num={s.cosing.toLocaleString()} label="EU CosIng (跨地区比对)" />
-        <Stat num={s.eu_prohibited.toLocaleString()} label="EU 禁用 (Annex II)" color="var(--red)" />
+        <Stat num={s.iecic_i.toLocaleString()} label={t("china.stat.iecic_i", lang)} color="var(--green)" />
+        <Stat num={s.iecic_ii.toLocaleString()} label={t("china.stat.iecic_ii", lang)} />
+        <Stat num={s.adjustments.toLocaleString()} label={t("china.stat.adjustments", lang)} color="var(--orange)" />
+        <Stat num={s.cosing.toLocaleString()} label={t("china.stat.cosing_compare", lang)} />
+        <Stat num={s.eu_prohibited.toLocaleString()} label={t("china.stat.eu_prohibited", lang)} color="var(--red)" />
       </div>
 
-      <Section title="📅 2025-2026 中国化妆品法规大事记">
+      <Section title={t("china.timeline.title", lang)}>
         {milestones.map((m, i) => (
           <div key={i} style={{ display: "flex", gap: "12px", padding: "8px 0", borderBottom: "1px dashed var(--border)" }}>
             <code style={{ color: "var(--orange)", minWidth: "100px", fontSize: "12px" }}>{m.date}</code>
@@ -86,16 +99,16 @@ export default async function ChinaPage() {
         ))}
       </Section>
 
-      <Section title="⚠️ GB 7916-2026 严控 8 种有害物质">
+      <Section title={t("china.gb.title", lang)}>
         <p style={{ fontSize: "12px", color: "var(--muted)", margin: "0 0 12px 0" }}>
-          首个强制性国标, 2028-01-01 实施, 取代 1987 版 GB 7916。
+          {t("china.gb.subtitle", lang)}
         </p>
         <table style={{ width: "100%", fontSize: "13px" }}>
           <thead>
             <tr style={{ color: "var(--muted)" }}>
-              <th style={{ textAlign: "left" }}>有害物质</th>
-              <th style={{ textAlign: "left" }}>限量</th>
-              <th style={{ textAlign: "left" }}>类别</th>
+              <th style={{ textAlign: "left" }}>{t("china.gb.substance", lang)}</th>
+              <th style={{ textAlign: "left" }}>{t("china.gb.limit", lang)}</th>
+              <th style={{ textAlign: "left" }}>{t("china.gb.category", lang)}</th>
             </tr>
           </thead>
           <tbody>
@@ -110,7 +123,7 @@ export default async function ChinaPage() {
         </table>
       </Section>
 
-      <Section title="🔄 2025-06-23 IECIC 调整说明 (前 6 段节选)">
+      <Section title={t("china.adjustments.title", lang)}>
         {recentChanges.map((row) => (
           <div key={row.id} style={{ padding: "6px 0", borderBottom: "1px dashed var(--border)", fontSize: "12px" }}>
             <code style={{ color: "var(--muted)" }}>§{row.id}:</code> {row.paragraph.slice(0, 200)}
@@ -119,14 +132,14 @@ export default async function ChinaPage() {
         ))}
       </Section>
 
-      <Section title="📊 IECIC Ⅰ 随机 8 条 (示例)">
+      <Section title={t("china.sample.title", lang)}>
         <table style={{ width: "100%", fontSize: "12px" }}>
           <thead>
             <tr style={{ color: "var(--muted)" }}>
-              <th>序号</th>
-              <th>中文名称</th>
-              <th>INCI 名称</th>
-              <th>搜索</th>
+              <th>{t("china.sample.seq", lang)}</th>
+              <th>{t("china.sample.zh", lang)}</th>
+              <th>{t("china.sample.inci", lang)}</th>
+              <th>{t("china.sample.search", lang)}</th>
             </tr>
           </thead>
           <tbody>
@@ -142,14 +155,14 @@ export default async function ChinaPage() {
         </table>
       </Section>
 
-      <Section title="🔗 多地区法规对比">
+      <Section title={t("china.regions.title", lang)}>
         <ul style={{ fontSize: "13px", lineHeight: "1.8" }}>
-          <li>🇨🇳 <strong>CN</strong>: NMPA + NIFDC + 中检院 (STSC 2015 + GB 7916-2026) — 8,985 原料 + 1,393 禁用 + 47 限用 + 4 类准用</li>
-          <li>🇪🇺 <strong>EU</strong>: CosIng + 5 Annex — 50,169 成分 + 1,927 监管 (开放)</li>
-          <li>🇺🇸 <strong>US</strong>: FDA + CIR — 11 禁用 + MoCRA 2022 (现代法案)</li>
-          <li>🇰🇷 <strong>KR</strong>: KCID 20,530 成分 (KFDA)</li>
-          <li>🇯🇵 <strong>JP</strong>: JCIA 16,152 成分 (PMDL)</li>
-          <li>🇦🇸 <strong>ASEAN</strong>: Annex II 1,870 禁用</li>
+          <li>🇨🇳 <strong>{lang === "en" ? "China" : "中国"}</strong>: {lang === "en" ? "NMPA + NIFDC (STSC 2015 + GB 7916-2026) — 8,985 ingredients + 1,393 banned + 47 restricted + 4 allowed categories" : "NMPA + NIFDC + 中检院 (STSC 2015 + GB 7916-2026) — 8,985 原料 + 1,393 禁用 + 47 限用 + 4 类准用"}</li>
+          <li>🇪🇺 <strong>{lang === "en" ? "EU" : "欧盟"}</strong>: {lang === "en" ? "CosIng + 5 Annex — 50,169 ingredients + 1,927 regulatory (open)" : "CosIng + 5 Annex — 50,169 成分 + 1,927 监管 (开放)"}</li>
+          <li>🇺🇸 <strong>{lang === "en" ? "US" : "美国"}</strong>: {lang === "en" ? "FDA + CIR — 11 banned + MoCRA 2022 (Modernization Act)" : "FDA + CIR — 11 禁用 + MoCRA 2022 (现代法案)"}</li>
+          <li>🇰🇷 <strong>{lang === "en" ? "Korea" : "韩国"}</strong>: KCID 20,530 {lang === "en" ? "ingredients" : "成分"} (KFDA)</li>
+          <li>🇯🇵 <strong>{lang === "en" ? "Japan" : "日本"}</strong>: JCIA 16,152 {lang === "en" ? "ingredients" : "成分"} (PMDL)</li>
+          <li>🇦🇸 <strong>{lang === "en" ? "ASEAN" : "东盟"}</strong>: {lang === "en" ? "Annex II" : "Annex II"} 1,870 {lang === "en" ? "banned" : "禁用"}</li>
         </ul>
       </Section>
     </div>

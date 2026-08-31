@@ -1,14 +1,19 @@
-import "./globals.css";
+﻿import "./globals.css";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import LangSwitcher from "../components/LangSwitcher";
+import { t, getLangFromCookies } from "../lib/i18n";
 
 export const metadata = {
-  title: "Open Cosmetics — 开放美妆数据",
-  description: "5 个公开源拼起来的 50K+ 美妆成分库 + EU 监管标识 + 配方映射",
+  title: "Open Cosmetics — 开放美妆数据 / Public Cosmetics Data",
+  description: "B2B cosmetics data MCP + Next.js — 50K EU CosIng + 8,985 CN IECIC + 4 synbio companies + 65 risk rules + MCP server",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const cookieStore = await cookies();
+  const lang = await getLangFromCookies(cookieStore);
   return (
-    <html lang="zh">
+    <html lang={lang === "en" ? "en" : "zh-CN"}>
       <body>
         <nav style={{
           background: "var(--panel)",
@@ -22,17 +27,20 @@ export default function RootLayout({ children }) {
           <Link href="/" style={{ color: "var(--accent)", fontWeight: 600, fontSize: "16px" }}>
             🧪 Open Cosmetics
           </Link>
-          <Link href="/ingredients" style={{ color: "var(--text)" }}>成分库 (50K)</Link>
-          <Link href="/regulatory" style={{ color: "var(--text)" }}>EU 监管 (1,927)</Link>
-          <Link href="/fda" style={{ color: "var(--text)" }}>FDA (85K)</Link>
-          <Link href="/china" style={{ color: "var(--orange)" }}>🇨🇳 中国 (8.9K)</Link>
-          <Link href="/synbio" style={{ color: "var(--green)" }}>🧬 合成生物</Link>
-          <Link href="/risk" style={{ color: "var(--red)" }}>⚖️ 风险审查</Link>
-          <Link href="/api/mcp" style={{ color: "var(--accent)" }}>🤖 MCP</Link>
-          <Link href="/sources" style={{ color: "var(--text)" }}>数据源</Link>
-          <span style={{ marginLeft: "auto", color: "var(--muted)", fontSize: "12px" }}>
-            快照: 2026-08-25 · MCP v0.1
-          </span>
+          <Link href="/ingredients" style={{ color: "var(--text)" }}>{t("nav.ingredients", lang)}</Link>
+          <Link href="/regulatory" style={{ color: "var(--text)" }}>{t("nav.regulatory", lang)}</Link>
+          <Link href="/fda" style={{ color: "var(--text)" }}>{t("nav.fda", lang)}</Link>
+          <Link href="/china" style={{ color: "var(--orange)" }}>{t("nav.china", lang)}</Link>
+          <Link href="/synbio" style={{ color: "var(--green)" }}>{t("nav.synbio", lang)}</Link>
+          <Link href="/risk" style={{ color: "var(--red)" }}>{t("nav.risk", lang)}</Link>
+          <Link href="/api/mcp" style={{ color: "var(--accent)" }}>{t("nav.mcp", lang)}</Link>
+          <Link href="/sources" style={{ color: "var(--text)" }}>{t("nav.sources", lang)}</Link>
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ color: "var(--muted)", fontSize: "12px" }}>
+              {t("site.snapshot", lang)}: 2026-08-25 · MCP v0.2
+            </span>
+            <LangSwitcher />
+          </div>
         </nav>
         <main style={{ maxWidth: "1280px", margin: "0 auto", padding: "24px" }}>
           {children}

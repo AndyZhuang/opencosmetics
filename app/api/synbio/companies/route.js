@@ -1,17 +1,21 @@
-// /api/synbio/companies — list 4 synbio companies with financials
+﻿// /api/synbio/companies — list 4 synbio companies with financials
+// Bilingual: ?lang=zh|en|both
 import { loadCompanies } from "../../../../lib/db";
+import { t, getLangFromCookies } from "../../../../lib/i18n";
+import { cookies } from "next/headers";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
+  const lang = searchParams.get("lang") || await getLangFromCookies(cookies());
   const data = loadCompanies();
   if (!data) {
-    return Response.json({ error: "companies.json not loaded" }, { status: 500 });
+    return Response.json({ error: t("api.error.companies_missing", lang) }, { status: 500 });
   }
   if (id) {
     const c = data.companies.find(x => x.id === id);
-    if (!c) return Response.json({ error: `company ${id} not found` }, { status: 404 });
-    return Response.json({ company: c, market: data.market_sizing });
+    if (!c) return Response.json({ error: `${t("api.error.company_not_found", lang)} ${id} ${t("api.error.not_found", lang)}` }, { status: 404 });
+    return Response.json({ company: c, market: data.market_sizing, lang });
   }
   // Summary list
   const summary = data.companies.map(c => ({
@@ -32,5 +36,6 @@ export async function GET(request) {
     companies: summary,
     market: data.market_sizing,
     upstream_competitors: data.upstream_competitors,
+    lang,
   });
 }

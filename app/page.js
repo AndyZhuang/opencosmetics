@@ -1,9 +1,12 @@
 import { query } from "../lib/db";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { t, getLangFromCookies } from "../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  const lang = getLangFromCookies(cookies().toString());
   const stats = await query(`
     SELECT
       (SELECT COUNT(*) FROM cosing) AS cosing,
@@ -43,14 +46,13 @@ export default async function Home() {
   return (
     <div>
       <h1 style={{ fontSize: "32px", margin: "0 0 8px 0" }}>
-        🧪 开放美妆数据
+        {t("home.title", lang)}
         <span style={{ fontSize: "16px", color: "var(--muted)", marginLeft: "12px" }}>
-          5 个公开源拼起来
+          {t("home.subtitle", lang)}
         </span>
       </h1>
       <p style={{ color: "var(--muted)" }}>
-        零法律风险, robots.txt 全部允许, jsDelivr CDN 下载。
-        与 BEBD 公开 schema 对比, 多 5000 倍数据 + 4 个 BEBD 完全缺失的维度。
+        {t("home.tagline", lang)}
       </p>
 
       <div style={{
@@ -59,14 +61,14 @@ export default async function Home() {
         gap: "12px",
         margin: "24px 0",
       }}>
-        <Stat num={s.cosing.toLocaleString()} label="统一 CosIng 成分" color="var(--green)" />
-        <Stat num={s.beauteeru.toLocaleString()} label="含 PubChem CID" />
-        <Stat num={s.obf.toLocaleString()} label="OBF 完整版" />
-        <Stat num={s.prohibited.toLocaleString()} label="EU 禁用 (Annex II)" color="var(--red)" />
-        <Stat num={s.restricted.toLocaleString()} label="EU 限用 (Annex III)" />
-        <Stat num={s.preservatives.toLocaleString()} label="EU 防腐剂" />
-        <Stat num={s.uv_filters.toLocaleString()} label="EU 防晒剂" />
-        <Stat num={s.incidb_ing.toLocaleString()} label="INCIDB 样本" />
+        <Stat num={s.cosing.toLocaleString()} label={t("home.stats.cosing", lang)} color="var(--green)" />
+        <Stat num={s.beauteeru.toLocaleString()} label={t("home.stats.beauteeru", lang)} />
+        <Stat num={s.obf.toLocaleString()} label={t("home.stats.obf", lang)} />
+        <Stat num={s.prohibited.toLocaleString()} label={t("home.stats.prohibited", lang)} color="var(--red)" />
+        <Stat num={s.restricted.toLocaleString()} label={t("home.stats.restricted", lang)} />
+        <Stat num={s.preservatives.toLocaleString()} label={t("home.stats.preservatives", lang)} />
+        <Stat num={s.uv_filters.toLocaleString()} label={t("home.stats.uv_filters", lang)} />
+        <Stat num={s.incidb_ing.toLocaleString()} label={t("home.stats.incidb", lang)} />
       </div>
 
       <div style={{
@@ -77,17 +79,17 @@ export default async function Home() {
         margin: "24px 0",
       }}>
         <h3 style={{ margin: "0 0 8px 0", color: "#f5a8a1" }}>
-          🚨 Killer Finding: BEBD 公开 Top 10 成分中 3 个匹配 EU 禁用清单
+          {t("home.killer.title", lang)}
         </h3>
         <p style={{ margin: 0, fontSize: "13px" }}>
-          BEBD 公开 schema 看不出这层。搜 "GLYCERIN" 不会告诉你同名变体 Nitroglycerin 是心脏药 (Annex II #253)。
+          {t("home.killer.note", lang)}
         </p>
         <table style={{ width: "100%", marginTop: "12px", fontSize: "13px" }}>
           <thead>
             <tr style={{ color: "var(--muted)" }}>
-              <th style={{ textAlign: "left" }}>BEBD 公开成分</th>
-              <th style={{ textAlign: "left" }}>EU 禁用变体 (Annex II)</th>
-              <th style={{ textAlign: "left" }}>Ref</th>
+              <th style={{ textAlign: "left" }}>{t("home.table.bebd", lang)}</th>
+              <th style={{ textAlign: "left" }}>{t("home.table.banned", lang)}</th>
+              <th style={{ textAlign: "left" }}>{t("home.table.ref", lang)}</th>
             </tr>
           </thead>
           <tbody>
@@ -99,19 +101,19 @@ export default async function Home() {
               </tr>
             ))}
             {reg.length === 0 && (
-              <tr><td colSpan="3" style={{ color: "var(--muted)", textAlign: "center" }}>无匹配</td></tr>
+              <tr><td colSpan="3" style={{ color: "var(--muted)", textAlign: "center" }}>{lang === "en" ? "No matches" : "无匹配"}</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <h2 style={{ marginTop: "32px" }}>📊 CosIng 成分功能 Top 5</h2>
+      <h2 style={{ marginTop: "32px" }}>📊 {lang === "en" ? "CosIng Function Top 5" : "CosIng 成分功能 Top 5"}</h2>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
             <th style={{ textAlign: "left" }}>Function</th>
-            <th style={{ textAlign: "left" }}>数量</th>
-            <th style={{ textAlign: "left" }}>柱</th>
+            <th style={{ textAlign: "left" }}>{lang === "en" ? "Count" : "数量"}</th>
+            <th style={{ textAlign: "left" }}>{lang === "en" ? "Bar" : "柱"}</th>
           </tr>
         </thead>
         <tbody>
@@ -137,10 +139,10 @@ export default async function Home() {
         </tbody>
       </table>
 
-      <h2 style={{ marginTop: "40px" }}>🗺️ 数据源</h2>
+      <h2 style={{ marginTop: "40px" }}>🗺️ {lang === "en" ? "Data Sources" : "数据源"}</h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
         <div>
-          <h3>🟢 已落库 (5 源)</h3>
+          <h3>🟢 {lang === "en" ? "Ingested (5 sources)" : "已落库 (5 源)"}</h3>
           <ul>
             <li><b>walkowskis</b> — EU CosIng 26K, Function/Restriction</li>
             <li><b>beauteeru</b> — EU CosIng 28K, PubChem CID</li>
@@ -150,9 +152,9 @@ export default async function Home() {
           </ul>
         </div>
         <div>
-          <h3>🟡 待办</h3>
+          <h3>🟡 {lang === "en" ? "Pending" : "待办"}</h3>
           <ul>
-            <li><b>INCIDB 全量</b> — 43K 成分, 公开仅 130, 余下在付费墙后</li>
+            <li><b>INCIDB full</b> — 43K 成分, 公开仅 130, 余下在付费墙后</li>
             <li><b>NMPA 备案</b> — 4M+ 中国数据, 这台机器 DNS 拦</li>
             <li><b>FDA VCRP</b> — 2M 美国商品</li>
             <li><b>Wikidata SPARQL</b> — 跨语言结构化标签</li>

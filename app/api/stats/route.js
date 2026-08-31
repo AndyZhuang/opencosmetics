@@ -1,9 +1,13 @@
-// /api/stats — aggregate database stats across all sources
+﻿// /api/stats — aggregate database stats across all sources
 import { query } from "../../../lib/db";
+import { cookies } from "next/headers";
+import { getLangFromCookies, t } from "../../../lib/i18n";
 import fs from "node:fs";
 import path from "node:path";
 
-export async function GET() {
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const lang = searchParams.get("lang") || await getLangFromCookies(cookies());
   // Try to query all known tables, gracefully handle missing ones
   const queries = [
     { sql: "SELECT COUNT(*) AS n FROM cosing", key: "eu_cosing" },
@@ -62,16 +66,17 @@ export async function GET() {
     },
     sources: [
       { name: "walkowskis/CosIng_database_finder", n: out.eu_cosing, type: "EU CosIng" },
-      { name: "beauteeru/cosmetic-ingredients-dataset", n: out.eu_cosing_lite, type: "PubChem" },
-      { name: "openfoodfacts/openbeautyfacts", n: out.obf_full, type: "OBF CosIng full" },
-      { name: "INCIDB/cosmetics-skincare-inci-database", n: out.incidb_ingredients, type: "INCIDB 公开" },
-      { name: "NMPA 2025 年第 61 号公告 (IECIC I)", n: out.cn_iecic_i, type: "中国 已使用" },
-      { name: "NMPA 2025 年第 61 号公告 (IECIC II)", n: out.cn_iecic_ii, type: "中国 新原料" },
-      { name: "NMPA 2025-06-23 调整说明", n: out.cn_adjustments, type: "中国 调整" },
-      { name: "FDA openFDA cosmetic events", n: 85511, type: "USA 事件" },
-      { name: "巨子/锦波/华熙/创健", n: 4, type: "合成生物 (公开披露)" },
-      { name: "rules.json", n: 65, type: "风险规则 (7 类)" },
+      { name: "beauteeru/cosmetic-ingredients-dataset", n: out.eu_cosing_lite, type: lang === "en" ? "PubChem" : "PubChem 增强" },
+      { name: "openfoodfacts/openbeautyfacts", n: out.obf_full, type: lang === "en" ? "OBF CosIng Full" : "OBF CosIng 完整" },
+      { name: "INCIDB/cosmetics-skincare-inci-database", n: out.incidb_ingredients, type: lang === "en" ? "INCIDB Public" : "INCIDB 公开" },
+      { name: lang === "en" ? "NMPA 2025 #61 (IECIC I)" : "NMPA 2025 年第 61 号公告 (IECIC I)", n: out.cn_iecic_i, type: lang === "en" ? "CN Existing" : "中国 已使用" },
+      { name: lang === "en" ? "NMPA 2025 #61 (IECIC II)" : "NMPA 2025 年第 61 号公告 (IECIC II)", n: out.cn_iecic_ii, type: lang === "en" ? "CN New Ingredients" : "中国 新原料" },
+      { name: lang === "en" ? "NMPA 2025-06-23 Adjustments" : "NMPA 2025-06-23 调整说明", n: out.cn_adjustments, type: lang === "en" ? "CN Adjustments" : "中国 调整" },
+      { name: "FDA openFDA cosmetic events", n: 85511, type: lang === "en" ? "USA Events" : "美国 事件" },
+      { name: lang === "en" ? "Juzi/Jinbo/Huaxi/Chuangjian" : "巨子/锦波/华熙/创健", n: 4, type: lang === "en" ? "Synbio (public)" : "合成生物 (公开披露)" },
+      { name: "rules.json", n: 65, type: lang === "en" ? "Risk rules (7 cats)" : "风险规则 (7 类)" },
     ],
+    lang,
     timestamp: new Date().toISOString(),
   });
 }

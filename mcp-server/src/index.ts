@@ -192,7 +192,7 @@ function synbioCompany(id?: string) {
 
 // ──── MCP server setup ───────────────────────────────
 const server = new Server(
-  { name: "opencosmetics-mcp", version: "0.1.0" },
+  { name: "opencosmetics-mcp", version: "0.2.0" },
   { capabilities: { tools: {} } }
 );
 
@@ -200,22 +200,22 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
       name: "ingredient_query",
-      description: "Query ingredient across CN (IECIC) + EU (CosIng + Annex II) regulatory sources.",
+      description: "Query ingredient across CN (IECIC) + EU (CosIng + Annex II) regulatory sources. / 跨源查询成分监管状态 (中国 NMPA IECIC + EU CosIng + EU Annex II 禁用)",
       inputSchema: {
         type: "object",
         properties: {
-          q: { type: "string", description: "Chinese name or INCI name" },
+          q: { type: "string", description: "Chinese name or INCI name / 中文名或 INCI 名" },
         },
         required: ["q"],
       },
     },
     {
       name: "formula_review",
-      description: "Check a formula against 65 rules (compatibility/pH/concentration/special population).",
+      description: "Check a formula against 65 rules (compatibility/pH/concentration/special population). / 65 规则审查 (兼容性 / pH / 浓度 / 特殊人群)",
       inputSchema: {
         type: "object",
         properties: {
-          ingredients: { type: "array", items: { type: "string" }, description: "INCI names" },
+          ingredients: { type: "array", items: { type: "string" }, description: "INCI names / INCI 名称" },
           context: {
             type: "object",
             properties: {
@@ -229,7 +229,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "compliance_check",
-      description: "Multi-region regulatory check for a single ingredient.",
+      description: "Multi-region regulatory check for a single ingredient (CN/EU/US/KR/JP/ASEAN). / 多地区合规扫描 (中国/欧盟/美国/韩国/日本/东盟)",
       inputSchema: {
         type: "object",
         properties: {
@@ -241,7 +241,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "synbio_company",
-      description: "Get synthetic-biology cosmetic company metadata (4 listed companies: 巨子/锦波/华熙/创健).",
+      description: "Get synthetic-biology cosmetic company metadata (4 listed companies: 巨子/锦波/华熙/创健). / 4 合成生物美妆原料上市公司",
       inputSchema: {
         type: "object",
         properties: { id: { type: "string", enum: ["juzi-bio", "jinbo-bio", "huaxi-bio", "chuangjian"] } },

@@ -1,16 +1,20 @@
-// /api/regions — multi-region regulatory check
+﻿// /api/regions — multi-region regulatory check
 // GET /api/regions?ingredient=HYDROQUINONE
 // GET /api/regions?ingredient=RETINOL&regions=CN,EU
+// Bilingual: ?lang=zh|en|both
 import { query, queryOne, loadRules } from "../../../lib/db";
+import { t, getLangFromCookies } from "../../../lib/i18n";
+import { cookies } from "next/headers";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const ingredient = (searchParams.get("ingredient") || "").trim();
   const regionsParam = searchParams.get("regions") || "CN,EU,US,KR,JP,ASEAN";
   const regions = regionsParam.split(",").map(s => s.trim().toUpperCase());
+  const lang = searchParams.get("lang") || await getLangFromCookies(cookies());
 
   if (!ingredient) {
-    return Response.json({ error: "ingredient parameter required" }, { status: 400 });
+    return Response.json({ error: t("api.error.ingredient_req", lang) }, { status: 400 });
   }
 
   const out = { ingredient, regions: {} };
@@ -48,9 +52,9 @@ export async function GET(request) {
     [ingredient, ingredient]
   );
   if (cn) {
-    out.cn_iecic = { status: "已使用 (收录)", seq: cn.seq, chinese_name: cn.chinese_name, inci_name: cn.inci_name };
+    out.cn_iecic = { status: lang === "en" ? "Listed (existing)" : "已使用 (收录)", seq: cn.seq, chinese_name: cn.chinese_name, inci_name: cn.inci_name };
   } else {
-    out.cn_iecic = { status: "未在 IECIC I (可能禁用/限用/未申报)" };
+    out.cn_iecic = { status: lang === "en" ? "Not in IECIC I (may be banned/restricted/unfiled)" : "未在 IECIC I (可能禁用/限用/未申报)" };
   }
 
   // EU CosIng
@@ -59,7 +63,7 @@ export async function GET(request) {
     [ingredient]
   );
   if (eu) {
-    out.eu_cosing = { status: "已收录", inci_name: eu.inci_name, function: eu.function };
+    out.eu_cosing = { status: lang === "en" ? "Listed" : "已收录", inci_name: eu.inci_name, function: eu.function };
   }
 
   // EU Annex II check
@@ -68,8 +72,9 @@ export async function GET(request) {
     [ingredient]
   );
   if (euBanned) {
-    out.eu_annex_ii = { status: "禁用", ref: euBanned.ref };
+    out.eu_annex_ii = { status: lang === "en" ? "Banned" : "禁用", ref: euBanned.ref };
   }
 
+  out.lang = lang;
   return Response.json(out);
 }
