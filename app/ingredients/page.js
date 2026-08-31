@@ -1,10 +1,13 @@
 import { query } from "../../lib/db";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { t, getLangFromCookies } from "../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function IngredientsPage({ searchParams }) {
   const sp = await searchParams;
+  const lang = await getLangFromCookies(cookies());
   const q = (sp?.q || "").trim();
   const page = Math.max(1, parseInt(sp?.page || "1", 10) || 1);
   const size = 50;
@@ -34,12 +37,12 @@ export default async function IngredientsPage({ searchParams }) {
 
   return (
     <div>
-      <h1>🧬 成分库 ({total.toLocaleString()})</h1>
+      <h1>{t("ingredients.title", lang)} ({total.toLocaleString()})</h1>
       <form method="GET" style={{ marginBottom: "16px" }}>
         <input
           name="q"
           defaultValue={q}
-          placeholder="搜 INCI / CAS / 功能..."
+          placeholder={t("ingredients.search.placeholder", lang)}
           style={{
             background: "var(--panel)",
             border: "1px solid var(--border)",
@@ -53,15 +56,21 @@ export default async function IngredientsPage({ searchParams }) {
         />
       </form>
       <div style={{ color: "var(--muted)", fontSize: "12px", marginBottom: "12px" }}>
-        第 {offset + 1}-{Math.min(offset + size, total)} / {total.toLocaleString()} 条 · 第 {page} / {pages} 页
+        {t("ingredients.pagination", lang, {
+          from: offset + 1,
+          to: Math.min(offset + size, total),
+          total: total.toLocaleString(),
+          page,
+          pages,
+        })}
       </div>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>INCI 名称</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>CAS</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>Function</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>Restriction</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("ingredients.col.inci", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("ingredients.cas", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("ingredients.fn", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("ingredients.restrictions", lang)}</th>
           </tr>
         </thead>
         <tbody>
@@ -100,8 +109,8 @@ export default async function IngredientsPage({ searchParams }) {
 
       {/* pagination */}
       <div style={{ marginTop: "24px", display: "flex", gap: "8px" }}>
-        {page > 1 && <Link href={`/ingredients?${new URLSearchParams({q, page: String(page - 1)})}`}>← 上一页</Link>}
-        {page < pages && <Link href={`/ingredients?${new URLSearchParams({q, page: String(page + 1)})}`}>下一页 →</Link>}
+        {page > 1 && <Link href={`/ingredients?${new URLSearchParams({q, page: String(page - 1)})}`}>{t("ingredients.prev", lang)}</Link>}
+        {page < pages && <Link href={`/ingredients?${new URLSearchParams({q, page: String(page + 1)})}`}>{t("ingredients.next", lang)}</Link>}
       </div>
     </div>
   );

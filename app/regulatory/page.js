@@ -1,9 +1,11 @@
 import { query } from "../../lib/db";
-import Link from "next/link";
+import { cookies } from "next/headers";
+import { t, getLangFromCookies } from "../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function RegulatoryPage() {
+  const lang = await getLangFromCookies(cookies());
   const counts = await query(`
     SELECT
       (SELECT COUNT(*) FROM annex_ii_prohibited) AS prohibited,
@@ -13,40 +15,39 @@ export default async function RegulatoryPage() {
       (SELECT COUNT(*) FROM annex_vi_uv_filters) AS uv_filters
   `);
   const c = counts[0];
+  const totalN = Number(c.prohibited) + Number(c.restricted) + Number(c.colorants) + Number(c.preservatives) + Number(c.uv_filters);
 
   const annexes = [
-    { key: "ii",   name: "Annex II — Prohibited (禁用)",       table: "annex_ii_prohibited",     desc: "化妆品中完全禁止使用的成分",     n: c.prohibited },
-    { key: "iii",  name: "Annex III — Restricted (限用)",      table: "annex_iii_restricted",    desc: "在特定浓度/部位/条件下限制使用",  n: c.restricted },
-    { key: "iv",   name: "Annex IV — Colorants (着色剂)",      table: "annex_iv_colorants",      desc: "允许使用的着色剂清单",            n: c.colorants },
-    { key: "v",    name: "Annex V — Preservatives (防腐剂)",   table: "annex_v_preservatives",   desc: "允许使用的防腐剂清单",            n: c.preservatives },
-    { key: "vi",   name: "Annex VI — UV Filters (防晒剂)",     table: "annex_vi_uv_filters",     desc: "允许使用的防晒剂清单",            n: c.uv_filters },
+    { key: "ii",   nameKey: "regulatory.annex.ii.name",  descKey: "regulatory.annex.ii.desc",  table: "annex_ii_prohibited",     n: c.prohibited },
+    { key: "iii",  nameKey: "regulatory.annex.iii.name", descKey: "regulatory.annex.iii.desc", table: "annex_iii_restricted",    n: c.restricted },
+    { key: "iv",   nameKey: "regulatory.annex.iv.name",  descKey: "regulatory.annex.iv.desc",  table: "annex_iv_colorants",      n: c.colorants },
+    { key: "v",    nameKey: "regulatory.annex.v.name",   descKey: "regulatory.annex.v.desc",   table: "annex_v_preservatives",   n: c.preservatives },
+    { key: "vi",   nameKey: "regulatory.annex.vi.name",  descKey: "regulatory.annex.vi.desc",  table: "annex_vi_uv_filters",     n: c.uv_filters },
   ];
 
-  // Show first 20 rows from each annex
   const samples = {};
   for (const a of annexes) {
-    const cols = await query(`DESCRIBE ${a.table}`);
-    const firstCol = cols[0][0];
     samples[a.key] = await query(`SELECT * FROM ${a.table} LIMIT 20`);
   }
 
   return (
     <div>
-      <h1>⚖️ EU 化妆品监管 ({Number(c.prohibited) + Number(c.restricted) + Number(c.colorants) + Number(c.preservatives) + Number(c.uv_filters)} 条)</h1>
-      <p style={{ color: "var(--muted)" }}>
-        EU Cosmetics Regulation 1223/2009 的 5 个 Annex. 任何成分查这个数据库,能直接告诉你在 EU 是不是允许用。
-      </p>
+      <h1>{t("regulatory.title", lang)} ({totalN.toLocaleString()})</h1>
+      <p style={{ color: "var(--muted)" }}>{t("regulatory.subtitle", lang)}</p>
 
       {annexes.map(a => (
         <section key={a.key} style={{ margin: "32px 0" }}>
-          <h2>{a.name} <span style={{ color: "var(--muted)", fontSize: "14px" }}>— {a.n} 条</span></h2>
-          <p style={{ color: "var(--muted)", fontSize: "13px" }}>{a.desc}</p>
+          <h2>
+            {t(a.nameKey, lang)}{" "}
+            <span style={{ color: "var(--muted)", fontSize: "14px" }}>— {Number(a.n).toLocaleString()}</span>
+          </h2>
+          <p style={{ color: "var(--muted)", fontSize: "13px" }}>{t(a.descKey, lang)}</p>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
             <thead>
               <tr style={{ color: "var(--muted)" }}>
-                <th style={{ textAlign: "left", padding: "8px 12px" }}>Ref</th>
+                <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("regulatory.col.ref", lang)}</th>
                 <th style={{ textAlign: "left", padding: "8px 12px" }}>Chemical Name / INCI</th>
-                <th style={{ textAlign: "left", padding: "8px 12px" }}>CAS</th>
+                <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("regulatory.col.cas", lang)}</th>
                 <th style={{ textAlign: "left", padding: "8px 12px" }}>EC</th>
               </tr>
             </thead>
@@ -70,7 +71,7 @@ export default async function RegulatoryPage() {
             </tbody>
           </table>
           <p style={{ color: "var(--muted)", fontSize: "12px", marginTop: "8px" }}>
-            显示前 20 / {a.n} 条
+            {t("regulatory.showing", lang, { n: Number(a.n).toLocaleString() })}
           </p>
         </section>
       ))}

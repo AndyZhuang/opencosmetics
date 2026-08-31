@@ -32,33 +32,23 @@ export default async function ChinaPage() {
 
   // 中国法规趋势
   const milestones = [
-    { date: "2025-06-23", event: lang === "en"
-      ? "NMPA 2025 #61: IECIC split into I (8,985) + II (dynamic new ingredients)"
-      : "NMPA 2025 年第 61 号公告: IECIC 拆分为 Ⅰ (8,985) + Ⅱ (动态纳入新原料)" },
-    { date: "2026-08-06", event: lang === "en"
-      ? "GB 7916-2026 published, effective 2028-01-01 (first mandatory national standard)"
-      : "GB 7916-2026《化妆品 安全通用要求》发布, 2028-01-01 实施 (首个强制性国标)" },
-    { date: "2026-08-25", event: lang === "en"
-      ? "First test: eye/lip area + children colony limit 10x stricter than regular products"
-      : "首项检测: 眼周/口唇/儿童菌落总数限量比普通产品严 10×" },
-    { date: "2026-08-20", event: lang === "en"
-      ? "IECIC 5th dynamic adjustment (3 new ingredients like Lauroyl Alanine → IECIC II)"
-      : "IECIC 第 5 次动态调整 (月桂酰丙氨酸等 3 个新原料 → IECIC Ⅱ)" },
-    { date: "2026-05-17", event: lang === "en"
-      ? "NMPA approved Saussurea involucrata callus powder (Dalian Purecare) into IECIC II"
-      : "NMPA 批准雪莲花愈伤组织粉 (大连普瑞康) 列入 IECIC Ⅱ" },
+    { date: "2025-06-23", key: "china.m.2025_61" },
+    { date: "2026-08-06", key: "china.m.gb_2026" },
+    { date: "2026-08-25", key: "china.m.first" },
+    { date: "2026-08-20", key: "china.m.adj5" },
+    { date: "2026-05-17", key: "china.m.snow" },
   ];
 
   // 8 种危害物 GB 7916-2026 限量
   const heavyMetals = [
-    { substance: lang === "en" ? "Lead (Pb)" : "铅 Pb", limit: "< 10 mg/kg", note: lang === "en" ? "Total heavy metal" : "重金属总量" },
-    { substance: lang === "en" ? "Arsenic (As)" : "砷 As", limit: "< 1 mg/kg", note: lang === "en" ? "Trace element" : "微量元素" },
-    { substance: lang === "en" ? "Mercury (Hg)" : "汞 Hg", limit: "< 4 mg/kg", note: lang === "en" ? "Trace element" : "微量元素" },
-    { substance: lang === "en" ? "Cadmium (Cd)" : "镉 Cd", limit: lang === "en" ? "(Cr/Cd/Cu/Mo/Fe/Ni) ≤ 50 mg/kg" : "(Cr/Cd/Cu/Mo/Fe/Ni) ≤ 50 mg/kg", note: lang === "en" ? "Trace element" : "微量元素" },
-    { substance: lang === "en" ? "Methanol (residual)" : "甲醇 (残留)", limit: lang === "en" ? "On-demand monitoring" : "按需监测", note: lang === "en" ? "Specific ingredient risk" : "特定原料风险" },
-    { substance: lang === "en" ? "Dioxane" : "二噁烷", limit: lang === "en" ? "On-demand monitoring" : "按需监测", note: lang === "en" ? "Specific ingredient risk" : "特定原料风险" },
-    { substance: lang === "en" ? "Asbestos" : "石棉", limit: lang === "en" ? "Banned" : "禁用", note: lang === "en" ? "Talc powder risk" : "滑石粉风险" },
-    { substance: lang === "en" ? "Benzene" : "苯", limit: "≤ 2 mg/kg", note: lang === "en" ? "Carbomer process residual" : "卡波姆工艺残留" },
+    { key: "heavy_metal.lead",     limit: "< 10 mg/kg", catKey: "heavy_metal.cat.heavy_metal" },
+    { key: "heavy_metal.arsenic",  limit: "< 1 mg/kg",  catKey: "heavy_metal.cat.trace" },
+    { key: "heavy_metal.mercury",  limit: "< 4 mg/kg",  catKey: "heavy_metal.cat.trace" },
+    { key: "heavy_metal.cadmium",  limit: "(Cr/Cd/Cu/Mo/Fe/Ni) ≤ 50 mg/kg", catKey: "heavy_metal.cat.trace" },
+    { key: "heavy_metal.methanol", limitKey: "heavy_metal.monitor", catKey: "heavy_metal.cat.specific" },
+    { key: "heavy_metal.dioxane",  limitKey: "heavy_metal.monitor", catKey: "heavy_metal.cat.specific" },
+    { key: "heavy_metal.asbestos", limitKey: "heavy_metal.banned",  catKey: "heavy_metal.cat.talc" },
+    { key: "heavy_metal.benzene",  limit: "≤ 2 mg/kg", catKey: "heavy_metal.cat.process" },
   ];
 
   // IECIC I 搜索 (top 5 个示例)
@@ -94,7 +84,7 @@ export default async function ChinaPage() {
         {milestones.map((m, i) => (
           <div key={i} style={{ display: "flex", gap: "12px", padding: "8px 0", borderBottom: "1px dashed var(--border)" }}>
             <code style={{ color: "var(--orange)", minWidth: "100px", fontSize: "12px" }}>{m.date}</code>
-            <span style={{ fontSize: "13px" }}>{m.event}</span>
+            <span style={{ fontSize: "13px" }}>{t(m.key, lang)}</span>
           </div>
         ))}
       </Section>
@@ -114,9 +104,9 @@ export default async function ChinaPage() {
           <tbody>
             {heavyMetals.map((h, i) => (
               <tr key={i}>
-                <td><strong>{h.substance}</strong></td>
-                <td><code style={{ color: "var(--red)" }}>{h.limit}</code></td>
-                <td>{h.note}</td>
+                <td><strong>{t(h.key, lang)}</strong></td>
+                <td><code style={{ color: "var(--red)" }}>{h.limit || t(h.limitKey, lang)}</code></td>
+                <td>{t(h.catKey, lang)}</td>
               </tr>
             ))}
           </tbody>
@@ -157,12 +147,12 @@ export default async function ChinaPage() {
 
       <Section title={t("china.regions.title", lang)}>
         <ul style={{ fontSize: "13px", lineHeight: "1.8" }}>
-          <li>🇨🇳 <strong>{lang === "en" ? "China" : "中国"}</strong>: {lang === "en" ? "NMPA + NIFDC (STSC 2015 + GB 7916-2026) — 8,985 ingredients + 1,393 banned + 47 restricted + 4 allowed categories" : "NMPA + NIFDC + 中检院 (STSC 2015 + GB 7916-2026) — 8,985 原料 + 1,393 禁用 + 47 限用 + 4 类准用"}</li>
-          <li>🇪🇺 <strong>{lang === "en" ? "EU" : "欧盟"}</strong>: {lang === "en" ? "CosIng + 5 Annex — 50,169 ingredients + 1,927 regulatory (open)" : "CosIng + 5 Annex — 50,169 成分 + 1,927 监管 (开放)"}</li>
-          <li>🇺🇸 <strong>{lang === "en" ? "US" : "美国"}</strong>: {lang === "en" ? "FDA + CIR — 11 banned + MoCRA 2022 (Modernization Act)" : "FDA + CIR — 11 禁用 + MoCRA 2022 (现代法案)"}</li>
-          <li>🇰🇷 <strong>{lang === "en" ? "Korea" : "韩国"}</strong>: KCID 20,530 {lang === "en" ? "ingredients" : "成分"} (KFDA)</li>
-          <li>🇯🇵 <strong>{lang === "en" ? "Japan" : "日本"}</strong>: JCIA 16,152 {lang === "en" ? "ingredients" : "成分"} (PMDL)</li>
-          <li>🇦🇸 <strong>{lang === "en" ? "ASEAN" : "东盟"}</strong>: {lang === "en" ? "Annex II" : "Annex II"} 1,870 {lang === "en" ? "banned" : "禁用"}</li>
+          <li>🇨🇳 <strong>{t("common.region.cn", lang)}</strong>: {t("china.region.cn", lang)}</li>
+          <li>🇪🇺 <strong>{t("common.region.eu", lang)}</strong>: {t("china.region.eu", lang)}</li>
+          <li>🇺🇸 <strong>{t("common.region.us", lang)}</strong>: {t("china.region.us", lang)}</li>
+          <li>🇰🇷 <strong>{t("common.region.kr", lang)}</strong>: KCID 20,530 {t("china.region.ingredients", lang)} (KFDA)</li>
+          <li>🇯🇵 <strong>{t("common.region.jp", lang)}</strong>: JCIA 16,152 {t("china.region.ingredients", lang)} (PMDL)</li>
+          <li>🇦🇸 <strong>{t("common.region.asean", lang)}</strong>: {t("china.region.asean", lang)}</li>
         </ul>
       </Section>
     </div>

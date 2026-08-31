@@ -107,13 +107,13 @@ export default async function Home() {
         </table>
       </div>
 
-      <h2 style={{ marginTop: "32px" }}>📊 {lang === "en" ? "CosIng Function Top 5" : "CosIng 成分功能 Top 5"}</h2>
+      <h2 style={{ marginTop: "32px" }}>{t("home.function.top", lang)}</h2>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
             <th style={{ textAlign: "left" }}>Function</th>
-            <th style={{ textAlign: "left" }}>{lang === "en" ? "Count" : "数量"}</th>
-            <th style={{ textAlign: "left" }}>{lang === "en" ? "Bar" : "柱"}</th>
+            <th style={{ textAlign: "left" }}>{t("common.count", lang)}</th>
+            <th style={{ textAlign: "left" }}>{t("common.bar", lang)}</th>
           </tr>
         </thead>
         <tbody>
@@ -139,25 +139,25 @@ export default async function Home() {
         </tbody>
       </table>
 
-      <h2 style={{ marginTop: "40px" }}>🗺️ {lang === "en" ? "Data Sources" : "数据源"}</h2>
+      <h2 style={{ marginTop: "40px" }}>{t("home.sources.title", lang)}</h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
         <div>
-          <h3>🟢 {lang === "en" ? "Ingested (5 sources)" : "已落库 (5 源)"}</h3>
+          <h3>{t("home.sources.ingested", lang)}</h3>
           <ul>
             <li><b>walkowskis</b> — EU CosIng 26K, Function/Restriction</li>
             <li><b>beauteeru</b> — EU CosIng 28K, PubChem CID</li>
-            <li><b>OBF Annexes</b> — EU 监管 1,927 条</li>
-            <li><b>OBF CosIng full</b> — EU CosIng 24K, 多源 join</li>
-            <li><b>INCIDB sample</b> — 130 成分 + 10 商品 + 191 配方</li>
+            <li><b>OBF Annexes</b> — EU {t("common.regulation", lang)} 1,927</li>
+            <li><b>OBF CosIng full</b> — EU CosIng 24K, multi-source join</li>
+            <li><b>INCIDB sample</b> — 130 {t("home.sources.li5", lang).match(/\d+/g)?.join(" + ") || "ingredients + products + formulas"}</li>
           </ul>
         </div>
         <div>
-          <h3>🟡 {lang === "en" ? "Pending" : "待办"}</h3>
+          <h3>{t("home.sources.pending", lang)}</h3>
           <ul>
-            <li><b>INCIDB full</b> — 43K 成分, 公开仅 130, 余下在付费墙后</li>
-            <li><b>NMPA 备案</b> — 4M+ 中国数据, 这台机器 DNS 拦</li>
-            <li><b>FDA VCRP</b> — 2M 美国商品</li>
-            <li><b>Wikidata SPARQL</b> — 跨语言结构化标签</li>
+            <li dangerouslySetInnerHTML={{ __html: t("home.sources.li6", lang) }} />
+            <li dangerouslySetInnerHTML={{ __html: t("home.sources.li7", lang) }} />
+            <li dangerouslySetInnerHTML={{ __html: t("home.sources.li8", lang) }} />
+            <li dangerouslySetInnerHTML={{ __html: t("home.sources.li9", lang) }} />
           </ul>
         </div>
       </div>

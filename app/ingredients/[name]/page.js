@@ -1,11 +1,14 @@
 import { query } from "../../../lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { t, getLangFromCookies } from "../../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function IngredientDetail({ params }) {
   const p = await params;
+  const lang = await getLangFromCookies(cookies());
   const name = decodeURIComponent(p.name);
   // case-insensitive lookup; get the canonical name
   const rows = await query(
@@ -26,7 +29,7 @@ export default async function IngredientDetail({ params }) {
     [name]
   );
 
-  // EU regulatory status — find the right chemical name column dynamically
+  // EU regulatory status
   const banned = await query(
     `SELECT "Chemical name / INN" AS name, "Reference Number" AS ref,
             "Regulation" AS regulation
@@ -52,7 +55,6 @@ export default async function IngredientDetail({ params }) {
      LIMIT 5`,
     [name, name]
   );
-  // annex_vi has slightly different column name: "Chemical name / INN / XAN"
   const uv = await query(
     `SELECT "Chemical name / INN / XAN" AS name, "Reference number" AS ref
      FROM annex_vi_uv_filters
@@ -66,32 +68,32 @@ export default async function IngredientDetail({ params }) {
 
   return (
     <div>
-      <Link href="/ingredients" style={{ fontSize: "13px" }}>← 全部成分</Link>
+      <Link href="/ingredients" style={{ fontSize: "13px" }}>{t("ingredients.back", lang)}</Link>
       <h1 style={{ marginTop: "12px" }}>{canonical}</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", margin: "24px 0" }}>
         <section>
-          <h3>🧪 基本信息</h3>
+          <h3>{t("ingredients.basic", lang)}</h3>
           <table style={{ width: "100%", fontSize: "13px" }}>
             <tbody>
               <Row k="CAS" v={ing.cas_no} />
               <Row k="EC" v={ing.ec_no} />
               <Row k="INN" v={ing.inn_name} />
               <Row k="Ph. Eur." v={ing.phe_eur_name} />
-              <Row k="Function" v={ing.function} wide />
-              <Row k="Restriction" v={ing.restriction} wide />
+              <Row k={t("ingredients.fn", lang)} v={ing.function} wide />
+              <Row k={t("ingredients.restrictions", lang)} v={ing.restriction} wide />
               <Row k="PubChem CID" v={pc0 ? (
                 <a href={String(pc0.pubchem)} target="_blank">{String(pc0.pubchem_cid)} →</a>
               ) : "—"} />
-              <Row k="Last update" v={ing.update_date} />
+              <Row k={t("common.updated", lang)} v={ing.update_date} />
             </tbody>
           </table>
         </section>
 
         <section>
-          <h3>⚖️ EU 监管状态</h3>
+          <h3>{t("ingredients.eu.title", lang)}</h3>
           {banned.length > 0 ? (
-            <Pill color="red" label="PROHIBITED (禁用)">
+            <Pill color="red" label={t("ingredients.eu.prohibited", lang)}>
               {banned.map((r, i) => (
                 <div key={i} style={{ fontSize: "12px" }}>
                   {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>(Ref #{r.ref})</span>
@@ -100,7 +102,7 @@ export default async function IngredientDetail({ params }) {
             </Pill>
           ) : null}
           {restricted.length > 0 ? (
-            <Pill color="orange" label="RESTRICTED (限用)">
+            <Pill color="orange" label={t("ingredients.eu.restricted", lang)}>
               {restricted.map((r, i) => (
                 <div key={i} style={{ fontSize: "12px" }}>
                   {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>(Ref #{r.ref})</span>
@@ -109,7 +111,7 @@ export default async function IngredientDetail({ params }) {
             </Pill>
           ) : null}
           {preservatives.length > 0 ? (
-            <Pill color="blue" label="PRESERVATIVE (防腐剂)">
+            <Pill color="blue" label={t("ingredients.eu.preservative", lang)}>
               {preservatives.map((r, i) => (
                 <div key={i} style={{ fontSize: "12px" }}>
                   {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>(Ref #{r.ref})</span>
@@ -118,7 +120,7 @@ export default async function IngredientDetail({ params }) {
             </Pill>
           ) : null}
           {uv.length > 0 ? (
-            <Pill color="yellow" label="UV FILTER (防晒剂)">
+            <Pill color="yellow" label={t("ingredients.eu.uvfilter", lang)}>
               {uv.map((r, i) => (
                 <div key={i} style={{ fontSize: "12px" }}>
                   {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>(Ref #{r.ref})</span>
@@ -128,7 +130,7 @@ export default async function IngredientDetail({ params }) {
           ) : null}
           {banned.length === 0 && restricted.length === 0 && preservatives.length === 0 && uv.length === 0 && (
             <div style={{ padding: "12px", background: "rgba(46,204,113,0.1)", border: "1px solid rgba(46,204,113,0.3)", borderRadius: "6px", color: "var(--green)" }}>
-              ✓ 在 EU 监管 5 个 Annex 中均无对应条目 (按名称匹配)
+              {t("ingredients.eu.none", lang)}
             </div>
           )}
         </section>
@@ -136,7 +138,7 @@ export default async function IngredientDetail({ params }) {
 
       {ing.chem_name && (
         <section>
-          <h3>📖 化学描述</h3>
+          <h3>{t("ingredients.chem", lang)}</h3>
           <div style={{ padding: "12px", background: "var(--panel)", borderRadius: "6px", fontSize: "13px", lineHeight: 1.7 }}>
             {ing.chem_name}
           </div>

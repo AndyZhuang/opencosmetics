@@ -13,7 +13,8 @@ export async function POST(request) {
     return Response.json({ error: t("api.error.json", lang) }, { status: 400 });
   }
 
-  const lang = body.lang || await getLangFromCookies(cookies());
+  const cookieLang = await getLangFromCookies(cookies());
+  const lang = body.lang || body.context?.lang || cookieLang;
   const ingredients = body.ingredients || [];
   const context = body.context || {};
 
@@ -21,6 +22,8 @@ export async function POST(request) {
     return Response.json({ error: t("api.error.ingredients", lang) }, { status: 400 });
   }
 
+  // Make sure context.lang is set so checkFormulaRisk can use it
+  if (!context.lang) context.lang = lang;
   const result = checkFormulaRisk(ingredients, context);
   const rules = loadRules();
 

@@ -1,11 +1,21 @@
 import Link from "next/link";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { cookies } from "next/headers";
+import { t, getLangFromCookies } from "../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
+const PERIOD_BG_KEYS = {
+  "2019-2020": "fda.time.2019_2020",
+  "2021-2023": "fda.time.2021_2023",
+  "2024-2025": "fda.time.2024_2025",
+  "2016-2018": "fda.time.2016_2018",
+  "2001-2010": "fda.time.2001_2010",
+};
+
 export default async function FDAPage() {
-  // Read the FDA JSON from public/ — works for both server-side render and static export
+  const lang = await getLangFromCookies(cookies());
   const filePath = path.join(process.cwd(), "public", "fda-cosmetic.json");
   const raw = await fs.readFile(filePath, "utf-8");
   const data = JSON.parse(raw);
@@ -15,10 +25,11 @@ export default async function FDAPage() {
 
   return (
     <div>
-      <h1>🛡️ openFDA Cosmetic Event Reports</h1>
+      <h1>🛡️ {t("fda.title", lang)}</h1>
       <p style={{ color: "var(--muted)" }}>
-        来源: <a href="https://api.fda.gov/cosmetic/event.json" target="_blank" rel="noreferrer">openFDA Cosmetic Event Reports</a> · 公开数据 (美国政府, 公共领域)
-        · 最近更新: {data.summary.last_updated} · 本地快照: {data.fetched_at}
+        {t("fda.source", lang)}: <a href="https://api.fda.gov/cosmetic/event.json" target="_blank" rel="noreferrer">openFDA Cosmetic Event Reports</a>
+        {lang === "en" ? " · Public data (US Government, public domain)" : " · 公开数据 (美国政府, 公共领域)"}
+        · {t("common.updated", lang)}: {data.summary.last_updated} · {t("fda.fetched", lang)}: {data.fetched_at}
       </p>
       <p style={{ color: "var(--muted)", fontSize: "13px" }}>
         {data.summary.disclaimer}
@@ -26,16 +37,16 @@ export default async function FDAPage() {
 
       {/* Hero stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", margin: "16px 0" }}>
-        <Stat num={data.summary.total_events.toLocaleString()} label="Cosmetic 事件" color="var(--red)" />
-        <Stat num={data.gender_split[0].count.toLocaleString()} label="女性 (95.7%)" color="var(--accent)" />
-        <Stat num={data.gender_split[1].count.toLocaleString()} label="男性 (4.3%)" color="var(--muted)" />
-        <Stat num={data.top_products[0].event_count.toLocaleString()} label="Johnsons Powder No UPC" color="var(--red)" />
-        <Stat num={data.top_reactions[0].count.toLocaleString()} label="Ovarian Cancer 反应" color="var(--red)" />
-        <Stat num="2001-2025" label="24 年" />
+        <Stat num={data.summary.total_events.toLocaleString()} label={t("fda.kpi.events", lang)} color="var(--red)" />
+        <Stat num={data.gender_split[0].count.toLocaleString()} label={t("fda.kpi.female", lang)} color="var(--accent)" />
+        <Stat num={data.gender_split[1].count.toLocaleString()} label={t("fda.kpi.male", lang)} color="var(--muted)" />
+        <Stat num={data.top_products[0].event_count.toLocaleString()} label={data.top_products[0].product} color="var(--red)" />
+        <Stat num={data.top_reactions[0].count.toLocaleString()} label={t("fda.kpi.ovarian", lang)} color="var(--red)" />
+        <Stat num="2001-2025" label={t("fda.kpi.years", lang)} />
       </div>
 
       {/* Key signals */}
-      <h2>🚨 关键安全信号 (4 个)</h2>
+      <h2>{t("fda.signals.title", lang)}</h2>
       {data.key_signals.map((s, i) => (
         <div key={i} style={{
           background: "rgba(231,76,60,0.1)",
@@ -51,17 +62,17 @@ export default async function FDAPage() {
       ))}
 
       {/* Top products */}
-      <h2>📦 Top 20 被报告产品</h2>
+      <h2>{t("fda.products.title", lang)}</h2>
       <p className="muted" style={{ fontSize: "13px" }}>
-        注: 这些是 user-reported 名字, 同一产品多个变体, 例如 J&J Baby Powder 在 5 个不同写法下总共 84K+ 报告
+        {t("fda.products.note", lang)}
       </p>
       <table>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
             <th style={{ textAlign: "left", padding: "8px 12px" }}>#</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>产品名</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>事件数</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>柱</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("fda.products.col.product", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("fda.products.col.count", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("common.bar", lang)}</th>
           </tr>
         </thead>
         <tbody>
@@ -83,14 +94,14 @@ export default async function FDAPage() {
       </table>
 
       {/* Top reactions */}
-      <h2>⚠️ Top 20 不良反应</h2>
+      <h2>{t("fda.reactions.title", lang)}</h2>
       <table>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
             <th style={{ textAlign: "left", padding: "8px 12px" }}>#</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>反应</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>次数</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>柱</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("fda.reactions.col.reaction", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("fda.reactions.col.count", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("common.bar", lang)}</th>
           </tr>
         </thead>
         <tbody>
@@ -112,16 +123,16 @@ export default async function FDAPage() {
       </table>
 
       {/* Yearly activity */}
-      <h2>📅 按时间分布 (估算)</h2>
+      <h2>{t("fda.time.title", lang)}</h2>
       <p className="muted" style={{ fontSize: "13px" }}>
-        早期记录少 (1990s MoCRA 实施前), 2018 后开始指数增长 (WEN/DevaCurl 诉讼 + J&J talc 系列宣判)
+        {t("fda.time.note", lang)}
       </p>
       <table>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>区间</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>事件估算</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>背景</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("fda.time.col.range", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("fda.time.col.events", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("fda.time.col.bg", lang)}</th>
           </tr>
         </thead>
         <tbody>
@@ -130,11 +141,7 @@ export default async function FDAPage() {
               <td style={{ padding: "8px 12px" }}>{period}</td>
               <td style={{ padding: "8px 12px" }}>{count.toLocaleString()}</td>
               <td style={{ padding: "8px 12px", color: "var(--muted)", fontSize: "12px" }}>
-                {period === "2019-2020" && "J&J talc 判决 + WEN 集体诉讼"}
-                {period === "2021-2023" && "DevaCurl 诉讼激增"}
-                {period === "2024-2025" && "MoCRA 2023 实施后, 报告要求强化"}
-                {period === "2016-2018" && "J&J 系列诉讼进入联邦法院"}
-                {period === "2001-2010" && "FDA 自愿报告, 极少数"}
+                {PERIOD_BG_KEYS[period] ? t(PERIOD_BG_KEYS[period], lang) : ""}
               </td>
             </tr>
           ))}
@@ -142,7 +149,7 @@ export default async function FDAPage() {
       </table>
 
       {/* Sample events */}
-      <h2>📋 样本事件 (3 条)</h2>
+      <h2>{t("fda.samples.title", lang)}</h2>
       <table>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
@@ -168,16 +175,20 @@ export default async function FDAPage() {
         </tbody>
       </table>
 
-      <h2>🔗 与 BEBD / CosIng 的关联</h2>
+      <h2>{t("fda.linkage.title", lang)}</h2>
       <ul>
-        <li>BEBD 公开 Top 8 成分均**未出现在 FDA 不良反应 Top 20** (美修指数榜 ≠ 安全榜)</li>
-        <li>BEBD "美修指数 99.82" 全部相同的 Top 10 成分也**没有 1 个在 FDA Top 反应里**</li>
-        <li>FDA 的真实信号是 <b>产品名</b> (J&J, WEN, DevaCurl) 而非 <b>成分</b> — BEBD schema 完全看不到产品名层</li>
-        <li>我们 v3 数据加上 openFDA 后, 真正能跑 "成分 × 安全信号" 跨源 join</li>
+        {[
+          t("fda.linkage.l1", lang),
+          t("fda.linkage.l2", lang),
+          t("fda.linkage.l3", lang),
+          t("fda.linkage.l4", lang),
+        ].map((html, i) => (
+          <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
+        ))}
       </ul>
 
       <p style={{ marginTop: "32px", color: "var(--muted)", fontSize: "12px" }}>
-        <Link href="/">← 回首页</Link> · <Link href="/sources">数据源</Link>
+        <Link href="/">{t("fda.back", lang)}</Link> · <Link href="/sources">{t("nav.sources", lang)}</Link>
       </p>
     </div>
   );
