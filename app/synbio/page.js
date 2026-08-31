@@ -18,7 +18,7 @@ const COMPANY_COLORS = {
 };
 
 export default async function SynbioPage() {
-  const lang = getLangFromCookies(cookies().toString());
+  const lang = await getLangFromCookies(cookies());
   const data = loadCompanies();
   if (!data) {
     return <div style={{ padding: "40px" }}>{lang === "en" ? "companies.json not found, check data/ directory" : "companies.json 未找到, 请检查 data/ 目录"}</div>;

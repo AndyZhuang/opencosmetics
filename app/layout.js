@@ -9,6 +9,8 @@ export const metadata = {
   description: "B2B cosmetics data MCP + Next.js — 50K EU CosIng + 8,985 CN IECIC + 4 synbio companies + 65 risk rules + MCP server",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
   const lang = await getLangFromCookies(cookieStore);

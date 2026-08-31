@@ -6,7 +6,7 @@ import { t, getLangFromCookies } from "../lib/i18n";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const lang = getLangFromCookies(cookies().toString());
+  const lang = await getLangFromCookies(cookies());
   const stats = await query(`
     SELECT
       (SELECT COUNT(*) FROM cosing) AS cosing,

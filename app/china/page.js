@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function ChinaPage() {
-  const lang = getLangFromCookies(cookies().toString());
+  const lang = await getLangFromCookies(cookies());
   // Stats
   const stats = await query(`
     SELECT
