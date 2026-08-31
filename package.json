@@ -1,0 +1,17 @@
+{
+  "name": "open-cosmetics",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000"
+  },
+  "dependencies": {
+    "@duckdb/node-api": "latest",
+    "duckdb": "1.4.4",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  }
+}

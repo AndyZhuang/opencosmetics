@@ -1,0 +1,24 @@
+/* Open Cosmetics — global styles */
+:root {
+  --bg: #0f1115;
+  --panel: #1a1d24;
+  --border: #2a2e38;
+  --text: #e4e6eb;
+  --muted: #8a8e98;
+  --accent: #6e4dff;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --orange: #f39c12;
+  --blue: #3498db;
+  --yellow: #f1c40f;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 0;
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px; line-height: 1.5;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #20242c; padding: 1px 6px; border-radius: 3px; font-size: 12px; }
