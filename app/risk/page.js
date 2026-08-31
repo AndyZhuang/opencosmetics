@@ -1,23 +1,49 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
-// 6 预置配方 (中英同源)
+// 6 预置配方 — zh 用中文成分名, en 用 INCI 名称
+// 提交时 zh 模式自动翻译为 INCI, en 模式直接用
 const PRESET_FORMULAS = {
-  "孕妇美白": { en: "Pregnant Whitening", list: ["RETINOL", "HYDROQUINONE", "VITAMIN_C", "NIACINAMIDE", "GLYCERIN"] },
-  "敏感肌抗老": { en: "Sensitive Anti-aging", list: ["RETINOL", "AHA", "VITAMIN_C", "NIACINAMIDE", "BHA", "COPPER_PEPTIDES"] },
-  "祛痘": { en: "Acne Treatment", list: ["BENZOYL_PEROXIDE", "BHA", "RETINOL", "VITAMIN_C", "NIACINAMIDE", "GLYCERIN"] },
-  "儿童润肤": { en: "Baby Moisturizer", list: ["GLYCERIN", "HYALURONIC_ACID", "CERAMIDE", "SQUALANE", "PANTHENOL"] },
-  "防晒": { en: "Sunscreen", list: ["OXYBENZONE", "TITANIUM_DIOXIDE", "OCTINOXATE", "AVOBENZONE", "HOMOSALATE"] },
-  "安全基础": { en: "Safe Base", list: ["GLYCERIN", "HYALURONIC_ACID", "SQUALANE", "PANTHENOL", "CERAMIDE", "NIACINAMIDE"] },
+  "孕妇美白": {
+    en: "Pregnant Whitening",
+    zh: ["视黄醇", "氢醌", "维生素C", "烟酰胺", "甘油"],
+    en_list: ["RETINOL", "HYDROQUINONE", "VITAMIN_C", "NIACINAMIDE", "GLYCERIN"],
+  },
+  "敏感肌抗老": {
+    en: "Sensitive Anti-aging",
+    zh: ["视黄醇", "果酸", "维生素C", "烟酰胺", "水杨酸", "铜肽"],
+    en_list: ["RETINOL", "AHA", "VITAMIN_C", "NIACINAMIDE", "BHA", "COPPER_PEPTIDES"],
+  },
+  "祛痘": {
+    en: "Acne Treatment",
+    zh: ["过氧化苯甲酰", "水杨酸", "视黄醇", "维生素C", "烟酰胺", "甘油"],
+    en_list: ["BENZOYL_PEROXIDE", "BHA", "RETINOL", "VITAMIN_C", "NIACINAMIDE", "GLYCERIN"],
+  },
+  "儿童润肤": {
+    en: "Baby Moisturizer",
+    zh: ["甘油", "透明质酸", "神经酰胺", "角鲨烷", "泛醇"],
+    en_list: ["GLYCERIN", "HYALURONIC_ACID", "CERAMIDE", "SQUALANE", "PANTHENOL"],
+  },
+  "防晒": {
+    en: "Sunscreen",
+    zh: ["二苯甲酮", "二氧化钛", "甲氧基肉桂酸辛酯", "阿伏苯宗", "胡莫柳酯"],
+    en_list: ["OXYBENZONE", "TITANIUM_DIOXIDE", "OCTINOXATE", "AVOBENZONE", "HOMOSALATE"],
+  },
+  "安全基础": {
+    en: "Safe Base",
+    zh: ["甘油", "透明质酸", "角鲨烷", "泛醇", "神经酰胺", "烟酰胺"],
+    en_list: ["GLYCERIN", "HYALURONIC_ACID", "SQUALANE", "PANTHENOL", "CERAMIDE", "NIACINAMIDE"],
+  },
 };
 
 const LABELS = {
   zh: {
     title: "⚖️ 配方风险审查",
     subtitle: "65 规则 × 7 类 — MixMyRoutine + STSC 2015 + NIFDC",
-    tagline: "实时检查成分兼容性 / pH / 浓度 / 特殊人群 / 区域合规 — Claude / GPT 可通过 MCP 调用",
-    ingredients_label: "成分列表 (逗号/换行分隔)",
+    tagline: "实时检查成分兼容性 / pH / 浓度 / 特殊人群 / 区域合规 — 输入中文成分名,系统自动翻译为 INCI 匹配规则",
+    ingredients_label: "成分列表 (中文名,逗号/换行分隔)",
+    ingredients_placeholder: "如: 视黄醇, 烟酰胺, 果酸",
     population_label: "人群",
     region_label: "地区",
     check_btn: "🔍 审查配方",
@@ -34,12 +60,14 @@ const LABELS = {
     cov_pop: "孕妇/婴幼儿/敏感肌", cov_region: "CN/EU/US/KR/JP/ASEAN", cov_synbio: "重组胶原 / 透明质酸 / NMN", cov_fda: "openFDA 85,511 reports",
     error: "❌ 错误:",
     mcp_link: "MCP",
+    unknown_warn: "⚠️ 以下成分不在 IECIC 收录中,可能无法匹配规则:",
   },
   en: {
     title: "⚖️ Formula Risk Review",
     subtitle: "65 rules × 7 categories — MixMyRoutine + STSC 2015 + NIFDC",
-    tagline: "Real-time check: compatibility / pH / concentration / special population / region — Claude/GPT can call via MCP",
-    ingredients_label: "Ingredients (comma/newline separated)",
+    tagline: "Real-time check: compatibility / pH / concentration / special population / region — Enter INCI names directly",
+    ingredients_label: "Ingredients (INCI, comma/newline separated)",
+    ingredients_placeholder: "e.g. RETINOL, NIACINAMIDE, AHA",
     population_label: "Population",
     region_label: "Region",
     check_btn: "🔍 Review Formula",
@@ -56,43 +84,54 @@ const LABELS = {
     cov_pop: "Pregnant/infant/sensitive", cov_region: "CN/EU/US/KR/JP/ASEAN", cov_synbio: "Recombinant collagen / HA / NMN", cov_fda: "openFDA 85,511 reports",
     error: "❌ Error:",
     mcp_link: "MCP",
+    unknown_warn: "⚠️ Not found in Chinese dictionary (may not match rules):",
   },
 };
 
 export default function RiskPage() {
-  // Read initial language from localStorage (client-side)
-  const [lang, setLang] = useState(() => {
+  const [lang, setLang] = useState("zh");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
     if (typeof window !== "undefined") {
-      return localStorage.getItem("opencosmetics_lang") || "both";
+      const stored = localStorage.getItem("opencosmetics_lang") || "zh";
+      setLang(stored);
     }
-    return "both";
-  });
-  // For "both" mode, default to Chinese display (since data is in English INCI, UI labels in zh)
+  }, []);
+
   const isEnglish = lang === "en";
   const L = isEnglish ? LABELS.en : LABELS.zh;
 
-  const [ingredients, setIngredients] = useState("RETINOL, AHA, VITAMIN_C, NIACINAMIDE, BHA");
+  // Default ingredients based on language
+  const defaultIngredients = isEnglish
+    ? "RETINOL, AHA, VITAMIN_C, NIACINAMIDE, BHA"
+    : "视黄醇, 果酸, 维生素C, 烟酰胺, 水杨酸";
+
+  const [ingredients, setIngredients] = useState(defaultIngredients);
   const [population, setPopulation] = useState("adult");
   const [region, setRegion] = useState("CN");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Update language on focus
-  if (typeof window !== "undefined") {
-    const stored = localStorage.getItem("opencosmetics_lang") || "both";
-    if (stored !== lang) setLang(stored);
-  }
+  // Update ingredients when language changes
+  useEffect(() => {
+    setIngredients(isEnglish
+      ? "RETINOL, AHA, VITAMIN_C, NIACINAMIDE, BHA"
+      : "视黄醇, 果酸, 维生素C, 烟酰胺, 水杨酸");
+  }, [isEnglish]);
 
   async function check() {
     setLoading(true);
     setError(null);
     try {
-      const ings = ingredients.split(/[,\n;]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+      const ings = ingredients.split(/[,\n;]+/).map(s => s.trim()).filter(Boolean);
+      // Send with lang in context — server will translate if zh
       const res = await fetch("/api/risk/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ingredients: ings, context: { population, region } }),
+        body: JSON.stringify({ ingredients: ings, context: { population, region, lang } }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
@@ -106,7 +145,7 @@ export default function RiskPage() {
 
   function applyPreset(name) {
     const preset = PRESET_FORMULAS[name];
-    setIngredients(preset.list.join(", "));
+    setIngredients(isEnglish ? preset.en_list.join(", ") : preset.zh.join(", "));
     if (name.includes("孕妇") || name === "Pregnant Whitening") setPopulation("pregnant");
     else if (name.includes("儿童") || name === "Baby Moisturizer") setPopulation("child");
     else setPopulation("adult");
@@ -132,6 +171,7 @@ export default function RiskPage() {
           <div>
             <label style={{ fontSize: "12px", color: "var(--muted)" }}>{L.ingredients_label}</label>
             <textarea value={ingredients} onChange={(e) => setIngredients(e.target.value)}
+              placeholder={L.ingredients_placeholder}
               rows={3} style={{ width: "100%", background: "var(--bg)", color: "var(--text)", border: "1px solid var(--border)", borderRadius: "4px", padding: "8px", fontFamily: "monospace", fontSize: "12px" }} />
           </div>
           <div>
@@ -193,6 +233,12 @@ export default function RiskPage() {
               <Badge num={result.findings.length} label={L.total} color="var(--blue)" />
             </div>
           </div>
+
+          {result.unknown_ingredients && result.unknown_ingredients.length > 0 && (
+            <div style={{ background: "rgba(241,196,15,0.1)", border: "1px solid rgba(241,196,15,0.3)", borderRadius: "6px", padding: "8px 12px", marginBottom: "12px", fontSize: "12px", color: "var(--orange)" }}>
+              {L.unknown_warn} {result.unknown_ingredients.join(", ")}
+            </div>
+          )}
 
           {result.findings.length === 0 ? (
             <p style={{ color: "var(--green)" }}>{L.pass}</p>

@@ -13,27 +13,63 @@ export default async function IngredientsPage({ searchParams }) {
   const size = 50;
   const offset = (page - 1) * size;
 
-  const where = q
-    ? `WHERE LOWER(inci_name) LIKE '%' || LOWER(?) || '%'
+  // In zh mode, also search by Chinese name (joined from cn_iecic_i)
+  let where, params, countSql, rowsSql;
+  if (q) {
+    if (lang === "zh") {
+      // Search both INCI and Chinese name
+      where = `WHERE (
+          LOWER(c.inci_name) LIKE '%' || LOWER(?) || '%'
+          OR LOWER(COALESCE(n.chinese_name, '')) LIKE '%' || LOWER(?) || '%'
+          OR LOWER(COALESCE(c.function, '')) LIKE '%' || LOWER(?) || '%'
+          OR LOWER(COALESCE(c.cas_no, '')) LIKE '%' || LOWER(?) || '%'
+        )`;
+      params = [q, q, q, q];
+      countSql = `
+        SELECT COUNT(DISTINCT c.inci_name) AS n
+        FROM cosing c
+        LEFT JOIN cn_iecic_i n ON UPPER(c.inci_name) = UPPER(n.inci_name)
+        ${where}
+      `;
+      rowsSql = `
+        SELECT DISTINCT c.inci_name, c.cas_no, c.function, c.restriction,
+               n.chinese_name
+        FROM cosing c
+        LEFT JOIN cn_iecic_i n ON UPPER(c.inci_name) = UPPER(n.inci_name)
+        ${where}
+        ORDER BY c.inci_name
+        LIMIT ? OFFSET ?
+      `;
+    } else {
+      where = `WHERE LOWER(inci_name) LIKE '%' || LOWER(?) || '%'
         OR LOWER(COALESCE(function, '')) LIKE '%' || LOWER(?) || '%'
-        OR LOWER(COALESCE(cas_no, '')) LIKE '%' || LOWER(?) || '%'`
-    : "";
-  const params = q ? [q, q, q] : [];
+        OR LOWER(COALESCE(cas_no, '')) LIKE '%' || LOWER(?) || '%'`;
+      params = [q, q, q];
+      countSql = `SELECT COUNT(*) AS n FROM cosing ${where}`;
+      rowsSql = `SELECT inci_name, cas_no, function, restriction
+       FROM cosing ${where}
+       ORDER BY inci_name
+       LIMIT ? OFFSET ?`;
+    }
+  } else {
+    where = "";
+    params = [];
+    countSql = "SELECT COUNT(*) AS n FROM cosing";
+    rowsSql = `SELECT c.inci_name, c.cas_no, c.function, c.restriction,
+             n.chinese_name
+             FROM cosing c
+             LEFT JOIN cn_iecic_i n ON UPPER(c.inci_name) = UPPER(n.inci_name)
+             ORDER BY c.inci_name
+             LIMIT ? OFFSET ?`;
+  }
 
-  const totalRow = await query(
-    `SELECT COUNT(*) AS n FROM cosing ${where}`,
-    params
-  );
+  const totalRow = await query(countSql, params);
   const total = Number(totalRow[0].n);
   const pages = Math.max(1, Math.ceil(total / size));
 
-  const rows = await query(
-    `SELECT inci_name, cas_no, function, restriction
-     FROM cosing ${where}
-     ORDER BY inci_name
-     LIMIT ? OFFSET ?`,
-    [...params, size, offset]
-  );
+  // Always pass [size, offset] for the rows query (after the WHERE clause params)
+  const rowsParams = lang === "zh" ? [...params, size, offset] : [...params, size, offset];
+  const rows = await query(rowsSql, rowsParams);
 
   return (
     <div>
@@ -67,7 +103,9 @@ export default async function IngredientsPage({ searchParams }) {
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("ingredients.col.inci", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>
+              {lang === "en" ? "INCI Name" : "中文名称 / INCI"}
+            </th>
             <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("ingredients.cas", lang)}</th>
             <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("ingredients.fn", lang)}</th>
             <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("ingredients.restrictions", lang)}</th>
@@ -78,7 +116,15 @@ export default async function IngredientsPage({ searchParams }) {
             <tr key={i} style={{ borderTop: "1px solid var(--border)" }}>
               <td style={{ padding: "8px 12px" }}>
                 <Link href={`/ingredients/${encodeURIComponent(r.inci_name)}`}>
-                  {r.inci_name}
+                  {lang === "en" || !r.chinese_name ? (
+                    r.inci_name
+                  ) : (
+                    <span>
+                      <strong>{r.chinese_name}</strong>
+                      <br/>
+                      <code style={{ fontSize: "10px", color: "var(--muted)" }}>{r.inci_name}</code>
+                    </span>
+                  )}
                 </Link>
               </td>
               <td style={{ padding: "8px 12px", color: "var(--muted)" }}>

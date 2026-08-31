@@ -6,7 +6,7 @@
  *   - ingredient_query(q: string)          CN/EU/INCI cross-reference
  *   - formula_review(ingredients[], ctx)    65-rule compatibility check
  *   - compliance_check(ingredient, regions) Multi-region regulatory
- *   - synbio_company(id?)                   4 listed synbio companies
+ *   - synbio_company(id?)                   REMOVED in v0.3.0 (was: 4 listed synbio companies)
  *
  * Usage with Claude Desktop:
  *   Add to ~/Library/Application Support/Claude/claude_desktop_config.json:
@@ -181,15 +181,6 @@ async function complianceCheck(ingredient: string, regions: string[]) {
   return out;
 }
 
-function synbioCompany(id?: string) {
-  const data = loadCompanies();
-  if (!data) return { error: "companies.json not loaded" };
-  if (id) {
-    return { company: data.companies.find((c: any) => c.id === id) };
-  }
-  return { count: data.companies.length, market: data.market_sizing, companies: data.companies };
-}
-
 // ──── MCP server setup ───────────────────────────────
 const server = new Server(
   { name: "opencosmetics-mcp", version: "0.2.0" },
@@ -239,14 +230,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         required: ["ingredient"],
       },
     },
-    {
-      name: "synbio_company",
-      description: "Get synthetic-biology cosmetic company metadata (4 listed companies: 巨子/锦波/华熙/创健). / 4 合成生物美妆原料上市公司",
-      inputSchema: {
-        type: "object",
-        properties: { id: { type: "string", enum: ["juzi-bio", "jinbo-bio", "huaxi-bio", "chuangjian"] } },
-      },
-    },
   ],
 }));
 
@@ -257,7 +240,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (name === "ingredient_query") result = await ingredientQuery((args as any).q);
     else if (name === "formula_review") result = await formulaReview((args as any).ingredients, (args as any).context);
     else if (name === "compliance_check") result = await complianceCheck((args as any).ingredient, (args as any).regions || ["CN", "EU", "US", "KR", "JP", "ASEAN"]);
-    else if (name === "synbio_company") result = synbioCompany((args as any)?.id);
     else return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   } catch (e: any) {

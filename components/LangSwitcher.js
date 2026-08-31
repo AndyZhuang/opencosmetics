@@ -2,14 +2,14 @@
 import { useEffect, useState } from "react";
 import { LANGUAGES, LANG_LABELS } from "../lib/i18n";
 
-// 3-state cycle: both → zh → en → both
-const NEXT = { both: "zh", zh: "en", en: "both" };
+// 2-state cycle: zh → en → zh
+const NEXT = { zh: "en", en: "zh" };
 
 export default function LangSwitcher() {
-  const [lang, setLang] = useState("both");
+  const [lang, setLang] = useState("zh");
   const [mounted, setMounted] = useState(false);
 
-  // Hydrate from localStorage + cookie
+  // Hydrate from localStorage
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem("opencosmetics_lang");
@@ -20,31 +20,23 @@ export default function LangSwitcher() {
 
   // Persist on change
   function cycle() {
-    const next = NEXT[lang] || "both";
+    const next = NEXT[lang] || "zh";
     setLang(next);
     localStorage.setItem("opencosmetics_lang", next);
-    // Also set cookie for SSR detection
+    // Set cookie for SSR detection
     document.cookie = `opencosmetics_lang=${next}; path=/; max-age=${60 * 60 * 24 * 365}`;
     // Update html lang attribute
     document.documentElement.lang = next === "en" ? "en" : "zh-CN";
-    // Force a soft refresh so server components re-read cookie
-    // (Next.js reads cookies() on every request)
-    routerRefresh();
-  };
-
-  // Use the App Router refresh
-  function routerRefresh() {
+    // Soft refresh (reload but keep scroll)
     if (typeof window !== "undefined") {
-      // Soft refresh: reload but keep scroll
       const y = window.scrollY;
       window.location.reload();
-      // restore scroll after reload
       window.addEventListener("load", () => window.scrollTo(0, y));
     }
   }
 
-  const label = LANG_LABELS[lang] || LANG_LABELS.both;
-  const displayText = lang === "en" ? label.en : (lang === "zh" ? label.zh : label.zh);
+  const label = LANG_LABELS[lang] || LANG_LABELS.zh;
+  const displayText = lang === "en" ? label.en : label.zh;
 
   return (
     <button

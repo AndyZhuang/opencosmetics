@@ -127,8 +127,17 @@ export default async function ChinaPage() {
           <thead>
             <tr style={{ color: "var(--muted)" }}>
               <th>{t("china.sample.seq", lang)}</th>
-              <th>{t("china.sample.zh", lang)}</th>
-              <th>{t("china.sample.inci", lang)}</th>
+              {lang === "en" ? (
+                <>
+                  <th>INCI Name</th>
+                  <th>Chinese Name</th>
+                </>
+              ) : (
+                <>
+                  <th>中文名称</th>
+                  <th>INCI 名称</th>
+                </>
+              )}
               <th>{t("china.sample.search", lang)}</th>
             </tr>
           </thead>
@@ -136,8 +145,17 @@ export default async function ChinaPage() {
             {samples.map((s, i) => (
               <tr key={i}>
                 <td>{s.seq}</td>
-                <td>{s.chinese_name}</td>
-                <td><code style={{ fontSize: "11px", color: "var(--orange)" }}>{s.inci_name}</code></td>
+                {lang === "en" ? (
+                  <>
+                    <td><code style={{ fontSize: "11px", color: "var(--orange)" }}>{s.inci_name}</code></td>
+                    <td>{s.chinese_name}</td>
+                  </>
+                ) : (
+                  <>
+                    <td>{s.chinese_name}</td>
+                    <td><code style={{ fontSize: "11px", color: "var(--orange)" }}>{s.inci_name}</code></td>
+                  </>
+                )}
                 <td><Link href={`/ingredients/${encodeURIComponent(s.inci_name)}`} style={{ color: "var(--blue)" }}>→</Link></td>
               </tr>
             ))}
