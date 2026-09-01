@@ -46,9 +46,9 @@ export default async function RegulatoryPage() {
             <thead>
               <tr style={{ color: "var(--muted)" }}>
                 <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("regulatory.col.ref", lang)}</th>
-                <th style={{ textAlign: "left", padding: "8px 12px" }}>Chemical Name / INCI</th>
+                <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("common.chemical", lang)}</th>
                 <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("regulatory.col.cas", lang)}</th>
-                <th style={{ textAlign: "left", padding: "8px 12px" }}>EC</th>
+                <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("common.ec", lang)}</th>
               </tr>
             </thead>
             <tbody>

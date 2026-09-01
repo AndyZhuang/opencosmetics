@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { t, getLangFromCookies } from "../../../lib/i18n";
+import { translateFunctions, translateRestriction } from "../../../lib/cosing_l10n";
 
 export const dynamic = "force-dynamic";
 
@@ -80,8 +81,8 @@ export default async function IngredientDetail({ params }) {
               <Row k="EC" v={ing.ec_no} />
               <Row k="INN" v={ing.inn_name} />
               <Row k="Ph. Eur." v={ing.phe_eur_name} />
-              <Row k={t("ingredients.fn", lang)} v={ing.function} wide />
-              <Row k={t("ingredients.restrictions", lang)} v={ing.restriction} wide />
+              <Row k={t("ingredients.fn", lang)} v={translateFunctions(ing.function, lang)} wide />
+              <Row k={t("ingredients.restrictions", lang)} v={translateRestriction(ing.restriction, lang)} wide />
               <Row k="PubChem CID" v={pc0 ? (
                 <a href={String(pc0.pubchem)} target="_blank">{String(pc0.pubchem_cid)} →</a>
               ) : "—"} />
@@ -96,7 +97,7 @@ export default async function IngredientDetail({ params }) {
             <Pill color="red" label={t("ingredients.eu.prohibited", lang)}>
               {banned.map((r, i) => (
                 <div key={i} style={{ fontSize: "12px" }}>
-                  {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>(Ref #{r.ref})</span>
+                  {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>{lang === "en" ? `(Ref #${r.ref})` : `(参考号 #${r.ref})`}</span>
                 </div>
               ))}
             </Pill>
@@ -105,7 +106,7 @@ export default async function IngredientDetail({ params }) {
             <Pill color="orange" label={t("ingredients.eu.restricted", lang)}>
               {restricted.map((r, i) => (
                 <div key={i} style={{ fontSize: "12px" }}>
-                  {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>(Ref #{r.ref})</span>
+                  {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>{lang === "en" ? `(Ref #${r.ref})` : `(参考号 #${r.ref})`}</span>
                 </div>
               ))}
             </Pill>
@@ -114,7 +115,7 @@ export default async function IngredientDetail({ params }) {
             <Pill color="blue" label={t("ingredients.eu.preservative", lang)}>
               {preservatives.map((r, i) => (
                 <div key={i} style={{ fontSize: "12px" }}>
-                  {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>(Ref #{r.ref})</span>
+                  {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>{lang === "en" ? `(Ref #${r.ref})` : `(参考号 #${r.ref})`}</span>
                 </div>
               ))}
             </Pill>
@@ -123,7 +124,7 @@ export default async function IngredientDetail({ params }) {
             <Pill color="yellow" label={t("ingredients.eu.uvfilter", lang)}>
               {uv.map((r, i) => (
                 <div key={i} style={{ fontSize: "12px" }}>
-                  {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>(Ref #{r.ref})</span>
+                  {String(r.name).slice(0, 80)} <span style={{ color: "var(--muted)" }}>{lang === "en" ? `(Ref #${r.ref})` : `(参考号 #${r.ref})`}</span>
                 </div>
               ))}
             </Pill>

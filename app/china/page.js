@@ -6,7 +6,7 @@ import { t, getLangFromCookies } from "../../lib/i18n";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "China Cosmetics Regulatory — IECIC I/II + Adjustments",
+  title: "中国化妆品法规数据 — IECIC Ⅰ/Ⅱ + 调整说明",
   description: "NMPA 国家药监局 化妆品原料目录 8,985 条 + 2025-06-23 调整说明",
 };
 

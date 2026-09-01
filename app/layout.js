@@ -5,8 +5,8 @@ import LangSwitcher from "../components/LangSwitcher";
 import { t, getLangFromCookies } from "../lib/i18n";
 
 export const metadata = {
-  title: "Open Cosmetics — 开放美妆数据 / Public Cosmetics Data",
-  description: "B2B cosmetics data MCP + Next.js — 50K EU CosIng + 8,985 CN IECIC + 4 synbio companies + 65 risk rules + MCP server",
+  title: "开放美妆数据",
+  description: "B2B 化妆品数据 MCP + Next.js — 50K EU CosIng + 8,985 CN IECIC + 65 风险规则 + MCP server",
 };
 
 export const dynamic = "force-dynamic";
@@ -27,7 +27,7 @@ export default async function RootLayout({ children }) {
           flexWrap: "wrap",
         }}>
           <Link href="/" style={{ color: "var(--accent)", fontWeight: 600, fontSize: "16px" }}>
-            🧪 Open Cosmetics
+            {t("site.brand", lang)}
           </Link>
           <Link href="/ingredients" style={{ color: "var(--text)" }}>{t("nav.ingredients", lang)}</Link>
           <Link href="/regulatory" style={{ color: "var(--text)" }}>{t("nav.regulatory", lang)}</Link>

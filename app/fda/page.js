@@ -27,7 +27,7 @@ export default async function FDAPage() {
     <div>
       <h1>🛡️ {t("fda.title", lang)}</h1>
       <p style={{ color: "var(--muted)" }}>
-        {t("fda.source", lang)}: <a href="https://api.fda.gov/cosmetic/event.json" target="_blank" rel="noreferrer">openFDA Cosmetic Event Reports</a>
+        {t("fda.source", lang)}: <a href="https://api.fda.gov/cosmetic/event.json" target="_blank" rel="noreferrer">{t("common.fda_link", lang)}</a>
         {lang === "en" ? " · Public data (US Government, public domain)" : " · 公开数据 (美国政府, 公共领域)"}
         · {t("common.updated", lang)}: {data.summary.last_updated} · {t("fda.fetched", lang)}: {data.fetched_at}
       </p>
@@ -153,11 +153,11 @@ export default async function FDAPage() {
       <table>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>Report #</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>Date</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>Patient</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>Products (Suspect)</th>
-            <th style={{ textAlign: "left", padding: "8px 12px" }}>Reactions</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("common.report_no", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("common.date", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("common.patient", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("common.products_suspect", lang)}</th>
+            <th style={{ textAlign: "left", padding: "8px 12px" }}>{t("common.reactions", lang)}</th>
           </tr>
         </thead>
         <tbody>
@@ -165,9 +165,9 @@ export default async function FDAPage() {
             <tr key={i}>
               <td style={{ padding: "8px 12px", color: "var(--muted)" }}>{e.report_number}</td>
               <td style={{ padding: "8px 12px" }}>{e.date}</td>
-              <td style={{ padding: "8px 12px" }}>{e.patient.gender} {e.patient.age}y</td>
+              <td style={{ padding: "8px 12px" }}>{e.patient.gender} {e.patient.age}{t("common.year_short", lang)}</td>
               <td style={{ padding: "8px 12px", color: "var(--orange)" }}>
-                {e.products.filter((p) => p.role === "Suspect").map((p) => p.name).join(", ") || "(none — only concomitant)"}
+                {e.products.filter((p) => p.role === "Suspect").map((p) => p.name).join(", ") || t("common.none_suspect", lang)}
               </td>
               <td style={{ padding: "8px 12px", color: "var(--red)", fontSize: "12px" }}>{e.reactions.join(", ")}</td>
             </tr>

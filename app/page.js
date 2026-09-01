@@ -2,6 +2,7 @@ import { query } from "../lib/db";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { t, getLangFromCookies } from "../lib/i18n";
+import { translateFunctions } from "../lib/cosing_l10n";
 
 export const dynamic = "force-dynamic";
 
@@ -111,7 +112,7 @@ export default async function Home() {
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
         <thead>
           <tr style={{ color: "var(--muted)" }}>
-            <th style={{ textAlign: "left" }}>Function</th>
+            <th style={{ textAlign: "left" }}>{t("common.function_label", lang)}</th>
             <th style={{ textAlign: "left" }}>{t("common.count", lang)}</th>
             <th style={{ textAlign: "left" }}>{t("common.bar", lang)}</th>
           </tr>
@@ -120,9 +121,10 @@ export default async function Home() {
           {topFns.map(r => {
             const max = Math.max(...topFns.map(x => Number(x.n)));
             const w = Math.round(400 * Number(r.n) / max);
+            const fnDisplay = translateFunctions(r.function, lang);
             return (
               <tr key={String(r.function)}>
-                <td>{r.function}</td>
+                <td>{fnDisplay}</td>
                 <td>{Number(r.n).toLocaleString()}</td>
                 <td>
                   <span style={{
@@ -144,11 +146,11 @@ export default async function Home() {
         <div>
           <h3>{t("home.sources.ingested", lang)}</h3>
           <ul>
-            <li><b>walkowskis</b> — EU CosIng 26K, Function/Restriction</li>
-            <li><b>beauteeru</b> — EU CosIng 28K, PubChem CID</li>
-            <li><b>OBF Annexes</b> — EU {t("common.regulation", lang)} 1,927</li>
-            <li><b>OBF CosIng full</b> — EU CosIng 24K, multi-source join</li>
-            <li><b>INCIDB sample</b> — 130 {t("home.sources.li5", lang).match(/\d+/g)?.join(" + ") || "ingredients + products + formulas"}</li>
+            <li><b>walkowskis</b> — {t("common.fields_short", lang)}</li>
+            <li><b>beauteeru</b> — {t("common.fields_cid", lang)}</li>
+            <li><b>OBF Annexes</b> — EU {t("common.regulation_label", lang)} 1,927</li>
+            <li><b>OBF CosIng full</b> — {lang === "en" ? "EU CosIng 24K, multi-source join" : "EU CosIng 24K, 多源 join"}</li>
+            <li><b>INCIDB sample</b> — 130 {lang === "en" ? "ingredients + 10 products + 191 formulas" : "成分 + 10 商品 + 191 配方"}</li>
           </ul>
         </div>
         <div>

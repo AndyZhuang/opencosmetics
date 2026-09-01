@@ -2,6 +2,7 @@ import { query } from "../../lib/db";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { t, getLangFromCookies } from "../../lib/i18n";
+import { translateFunctions, translateRestriction } from "../../lib/cosing_l10n";
 
 export const dynamic = "force-dynamic";
 
@@ -132,7 +133,7 @@ export default async function IngredientsPage({ searchParams }) {
               </td>
               <td style={{ padding: "8px 12px" }}>
                 {r.function ? (
-                  r.function.split(",").map((f, j) => (
+                  translateFunctions(r.function, lang).split(/[,、]/).map((f, j) => (
                     <span key={j} style={{
                       display: "inline-block",
                       padding: "2px 8px",
@@ -146,7 +147,7 @@ export default async function IngredientsPage({ searchParams }) {
                 ) : "—"}
               </td>
               <td style={{ padding: "8px 12px", color: "var(--muted)", fontSize: "12px" }}>
-                {r.restriction || "—"}
+                {translateRestriction(r.restriction, lang) || "—"}
               </td>
             </tr>
           ))}

@@ -43,13 +43,13 @@ export default async function SourcesPage() {
             <td>walkowskis</td>
             <td>cosing_walkowskis</td>
             <td>{Number(s.walkowskis).toLocaleString()}</td>
-            <td>INCI + CAS + EC + Function + Restriction + INN + PhEur</td>
+            <td>{t("common.fields_short", lang)}</td>
           </tr>
           <tr>
             <td>beauteeru</td>
             <td>cosing_lite</td>
             <td>{Number(s.beauteeru).toLocaleString()}</td>
-            <td>INCI + CAS + EC + PubChem CID</td>
+            <td>{t("common.fields_cid", lang)}</td>
           </tr>
           <tr>
             <td>OBF CosIng full</td>
@@ -90,8 +90,11 @@ export default async function SourcesPage() {
           <tr>
             <td>INCIDB</td>
             <td>incidb_*</td>
-            <td>9 brands + {Number(s.incidb_ing)} ing + {Number(s.incidb_prod)} prod + {Number(s.incidb_pi)} mappings</td>
-            <td>{lang === "en" ? "INCI + 17 source join + comedogenic + FDA warning" : "INCI + 17 源 join + 致痘 + FDA 警告"}</td>
+            <td>{lang === "en"
+              ? `9 brands + ${Number(s.incidb_ing).toLocaleString()} ing + ${Number(s.incidb_prod).toLocaleString()} prod + ${Number(s.incidb_pi).toLocaleString()} mappings`
+              : `9 品牌 + ${Number(s.incidb_ing).toLocaleString()} 成分 + ${Number(s.incidb_prod).toLocaleString()} 商品 + ${Number(s.incidb_pi).toLocaleString()} 映射`}
+            </td>
+            <td>{t("common.brand_inci_pubchem", lang)}</td>
           </tr>
         </tbody>
       </table>
