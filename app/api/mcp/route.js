@@ -11,6 +11,7 @@ import { analyzeFormula } from "../../../lib/formula_analyzer";
 import { findSubstitutes, listGroups } from "../../../lib/substitution";
 import { suggestFormulaFromClaim, listClaims } from "../../../lib/claim_to_formula";
 import { listReferenceFormulas, getReferenceFormula, searchReferenceFormulas } from "../../../lib/reference_formulas";
+import { listTrends, getTrend, getTrendActivesSummary } from "../../../lib/trends";
 
 const TOOLS = {
   ingredient_query: {
@@ -100,6 +101,20 @@ const TOOLS = {
       if (id) return getReferenceFormula(id);
       const found = searchReferenceFormulas(q);
       return { count: found.length, formulas: found };
+    },
+  },
+  industry_trends: {
+    description: "Get current industry trends: ingredient growth signals (e.g. 'BIFIDA FERMENT LYSATE +35%'), K-beauty/C-beauty launches, biotech actives (recombinant collagen, PDRN, exosomes). Returns trend cards with active ingredients, growth %, regional focus, and rationale.",
+    description_zh: "获取当前行业趋势: 成分增长信号 (如 'BIFIDA FERMENT LYSATE +35%')、K-beauty/C-beauty 新品、生物科技活性物 (重组胶原/PDRN/外泌体)。返回趋势卡片含活性物、增长率、地区焦点、原因。",
+    args_schema: {
+      id: "string (specific trend id, e.g. 'barrier_repair_2026_h1')",
+      summary: "boolean (true = return cross-trend active ingredient summary)",
+      lang: "'zh' | 'en' (default: from cookie)",
+    },
+    handler: async ({ id, summary, lang = "zh" }) => {
+      if (id) return getTrend(id);
+      if (summary) return { actives_summary: getTrendActivesSummary() };
+      return { count: listTrends().length, trends: listTrends() };
     },
   },
   compliance_check: {

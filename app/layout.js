@@ -39,6 +39,7 @@ export default async function RootLayout({ children }) {
           <Link href="/claim" style={{ color: "var(--blue)" }}>{t("nav.claim", lang)}</Link>
           <Link href="/reference" style={{ color: "var(--text)" }}>{t("nav.reference", lang)}</Link>
           <Link href="/scan" style={{ color: "#9b59b6" }}>{t("nav.scan", lang)}</Link>
+          <Link href="/trends" style={{ color: "var(--text)" }}>{t("nav.trends", lang)}</Link>
           <Link href="/api/mcp" style={{ color: "var(--accent)" }}>{t("nav.mcp", lang)}</Link>
           <Link href="/sources" style={{ color: "var(--text)" }}>{t("nav.sources", lang)}</Link>
           <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "12px" }}>

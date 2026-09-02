@@ -1,0 +1,90 @@
+{
+  "version": "0.1.0",
+  "last_updated": "2026-09-03",
+  "note": "Scaffold data — placeholder for future automated trend collection. To be replaced with real data from Sephora/Amazon bestsellers, K-beauty launches, and patent filings.",
+  "trends": [
+    {
+      "id": "barrier_repair_2026_h1",
+      "title_zh": "2026 H1 屏障修护赛道",
+      "title_en": "Barrier Repair Trend 2026 H1",
+      "category": "skincare",
+      "active_ingredients": [
+        { "inci": "CERAMIDE NP", "growth": "+45%", "note_zh": "受海蓝之谜 + CeraVe 双驱动" },
+        { "inci": "PANTHENOL", "growth": "+30%", "note_zh": "理肤泉 B5 销量持续走高" },
+        { "inci": "MADECASSOSIDE", "growth": "+60%", "note_zh": "国货敏感肌线狂推" },
+        { "inci": "ECTOIN", "growth": "+120%", "note_zh": "极端环境 (空调/差旅) 概念爆" }
+      ],
+      "region_focus": ["CN", "KR", "EU"],
+      "source_signals": ["Sephora bestseller 增速", "国货新品 8 月", "COSMAX 2026 H1 趋势报告"],
+      "summary_zh": "屏障修护从'急救'变'日常', 神经酰胺 1:1:1 仿生脂质 + 积雪草苷 + B5 黄金三角。高端线推 ECTOIN 极端环境概念, 中端线卷 CeraVe 配方, 国货用积雪草苷差异化。",
+      "summary_en": "Barrier repair shifts from 'rescue' to 'daily'. Ceramide 1:1:1 biomimetic + centella + B5 golden triangle. Premium uses Ectoine for extreme environments, mid-tier copies CeraVe, C-beauty differentiates with madecassoside."
+    },
+    {
+      "id": "kbeauty_glow_2026",
+      "title_zh": "2026 K-beauty 光泽肌赛道",
+      "title_en": "2026 K-beauty Glow Trend",
+      "category": "skincare",
+      "active_ingredients": [
+        { "inci": "CENTELLA ASIATICA EXTRACT", "growth": "+50%", "note_zh": "K-beauty 国民成分" },
+        { "inci": "BIFIDA FERMENT LYSATE", "growth": "+35%", "note_zh": "韩国品牌偏爱的二裂酵母" },
+        { "inci": "GALACTOMYCES FERMENT FILTRATE", "growth": "+25%", "note_zh": "Pitera 类发酵物" },
+        { "inci": "MELATONIN", "growth": "+200%", "note_zh": "韩国新原料, 抗氧化 + 修护" }
+      ],
+      "region_focus": ["KR", "CN"],
+      "source_signals": ["Olive Young 全球出口数据", "Amorepacific 季报"],
+      "summary_zh": "光泽肌 (mul-gwang) 是 K-beauty 2026 核心, 强调微生态 + 屏障 + 微弱酸。COSRX/Sulwhasoo/Hera 主推 PDRN + 益生元。",
+      "summary_en": "Mul-gwang (glass glow) is K-beauty's 2026 core. Microbiome + barrier + mild acids. COSRX/Sulwhasoo/Hera push PDRN + prebiotics."
+    },
+    {
+      "id": "biotech_actives_2026",
+      "title_zh": "2026 生物科技活性物崛起",
+      "title_en": "2026 Biotech Actives Rise",
+      "category": "skincare",
+      "active_ingredients": [
+        { "inci": "RECOMBINANT COLLAGEN", "growth": "+85%", "note_zh": "锦波 + 巨子 国产重组胶原双雄, ¥10 亿级单品" },
+        { "inci": "RECOMBINANT EGF / OLIGOPEPTIDE-1", "growth": "+100%", "note_zh": "医美级原料进 C-beauty 大众线" },
+        { "inci": "PDRN / POLYDEOXYRIBONUCLEOTIDE", "growth": "+150%", "note_zh": "三文鱼针剂原料, K-beauty 主推" },
+        { "inci": "EXOSOME", "growth": "+400%", "note_zh": "外泌体概念爆, 但监管未明" }
+      ],
+      "region_focus": ["CN", "KR", "JP"],
+      "source_signals": ["锦波生物年报", "巨子生物季报", "Amorepacific PDRN 专利"],
+      "summary_zh": "重组胶原/PDRN/外泌体三大生物科技赛道, 2025-2026 国货 ¥100 亿级增量。监管风险: 外泌体化妆品未明确。",
+      "summary_en": "Recombinant collagen / PDRN / exosomes — 3 biotech lanes, ¥10B+ increment in C-beauty 2025-2026. Regulatory risk: exosomes in cosmetics unclear."
+    },
+    {
+      "id": "minimalist_inci_2026",
+      "title_zh": "2026 极简配方潮流",
+      "title_en": "2026 Minimalist INCI Trend",
+      "category": "skincare",
+      "active_ingredients": [
+        { "inci": "ALLANTOIN", "growth": "+20%", "note_zh": "经典舒缓回归" },
+        { "inci": "GLYCERIN", "growth": "stable", "note_zh": "保湿基础永不退场" }
+      ],
+      "key_metrics": {
+        "average_inci_count_2024": 28,
+        "average_inci_count_2026": 14,
+        "decline_pct": "-50%"
+      },
+      "region_focus": ["Global"],
+      "source_signals": ["Drunk Elephant 'Biocompatible' 哲学", "The Ordinary 极简主义"],
+      "summary_zh": "极简配方 (平均 14 个成分) 反向回潮, 'Less is more' 理念。Drunk Elephant 推动, 韩国品牌跟进。",
+      "summary_en": "Minimalist formulas (avg 14 ingredients) come back. 'Less is more'. Drunk Elephant leads, K-beauty follows."
+    },
+    {
+      "id": "sunscreen_innovation_2026",
+      "title_zh": "2026 防晒技术创新",
+      "title_en": "2026 Sunscreen Innovation",
+      "category": "sunscreen",
+      "active_ingredients": [
+        { "inci": "TINOSORB S (BEMOTRIZINOL)", "growth": "+60%", "note_zh": "欧莱雅专利过期, 国货开始用" },
+        { "inci": "TINOSORB M (BISOCTRIZOLE)", "growth": "+45%", "note_zh": "超广谱 UVA" },
+        { "inci": "MEXORYL 400", "growth": "+200%", "note_zh": "L'Oreal 独家" },
+        { "inci": "POLYPLATINUM SILICONE COATING", "growth": "new", "note_zh": "防晒抗水新技术" }
+      ],
+      "region_focus": ["EU", "JP", "CN"],
+      "source_signals": ["BASF 2026 防晒原料新品", "欧莱雅专利到期"],
+      "summary_zh": "新一代超广谱 UVA 防晒 (Tinosorb S/M, MEXORYL 400) 因欧莱雅专利过期而大爆发。物理防晒剂 (ZnO) 也在高端线回潮。",
+      "summary_en": "New generation super-broad UVA filters (Tinosorb S/M, MEXORYL 400) boom as L'Oreal patents expire. Mineral ZnO also comes back in premium."
+    }
+  ]
+}
