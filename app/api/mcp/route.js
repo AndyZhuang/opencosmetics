@@ -9,6 +9,7 @@ import { cookies } from "next/headers";
 import { getLangFromCookies, t } from "../../../lib/i18n";
 import { analyzeFormula } from "../../../lib/formula_analyzer";
 import { findSubstitutes, listGroups } from "../../../lib/substitution";
+import { suggestFormulaFromClaim, listClaims } from "../../../lib/claim_to_formula";
 
 const TOOLS = {
   ingredient_query: {
@@ -70,6 +71,20 @@ const TOOLS = {
     },
     handler: async ({ inci, max_results = 5, lang = "zh" }) => {
       return await findSubstitutes(inci, { max_results, lang });
+    },
+  },
+  claim_to_formula: {
+    description: "Suggest a starter formula (5 actives + concentrations + vehicle) from consumer claim. Use when brief is 'I want to make a [sensitive/whitening/anti-aging] [product type] for [demographic] at [price tier]'. Returns ready-to-formulate ingredient brief.",
+    description_zh: "从消费者目标反推配方 (5 个活性 + 浓度 + 基质)。brief 例子: '我想做一个敏感肌修护 ¥300 的精华' → 完整可调配方 brief。",
+    args_schema: {
+      claim_id: "string (one of available_claims.id, e.g. 'sensitive_repair', 'whitening_brightening')",
+      concerns: "string (Chinese/English keyword, alternative to claim_id)",
+      population: "adult|pregnant|child|sensitive",
+      price_tier: "drugstore|mid|premium|luxury",
+      lang: "'zh' | 'en' (default: from cookie)",
+    },
+    handler: async ({ claim_id, concerns, population, price_tier, lang = "zh" }) => {
+      return suggestFormulaFromClaim({ claim_id, concerns, population, price_tier, lang });
     },
   },
   compliance_check: {
@@ -179,6 +194,7 @@ export async function GET(request) {
       { tool: "formula_review", args: { ingredients: ["RETINOL", "AHA", "VITAMIN_C"], context: { population: "pregnant", region: "CN" } } },
       { tool: "formula_analyze", args: { ingredients: "AQUA, GLYCERIN, NIACINAMIDE, BIFIDA FERMENT LYSATE, SQUALANE, TOCOPHEROL, PHENOXYETHANOL", lang: "zh" } },
       { tool: "substitute_ingredient", args: { inci: "RETINOL", lang: "zh" } },
+      { tool: "claim_to_formula", args: { concerns: "敏感肌修护", price_tier: "mid", lang: "zh" } },
       { tool: "compliance_check", args: { ingredient: "HYDROQUINONE", regions: ["CN", "EU", "US", "JP"] } },
       { tool: "synbio_company", args: { id: "jinbo-bio" } },
     ],
