@@ -7,6 +7,7 @@
 import { query, queryOne, checkFormulaRisk, loadCompanies, loadRules } from "../../../lib/db";
 import { cookies } from "next/headers";
 import { getLangFromCookies, t } from "../../../lib/i18n";
+import { analyzeFormula } from "../../../lib/formula_analyzer";
 
 const TOOLS = {
   ingredient_query: {
@@ -44,6 +45,18 @@ const TOOLS = {
     args_schema: { ingredients: "string[]", context: { population: "adult|pregnant|child|sensitive", region: "CN|EU|US|KR|JP|ASEAN" } },
     handler: async ({ ingredients, context = {} }) => {
       return checkFormulaRisk(ingredients, context);
+    },
+  },
+  formula_analyze: {
+    description: "Reverse-engineer a cosmetic formula from INCI text. Returns formula type, top 3 actives, vehicle, 65-rule risk scan, EU/CN regulatory status, price tier, target demographic, and improvement suggestions. Optimized for LLM agent consumption (structured JSON).",
+    description_zh: "从 INCI 文本反向分析配方。返回配方类型、Top 3 活性物、基质、65 规则风险扫描、EU/CN 法规状态、价位、目标人群、改进建议。结构化 JSON, 适合 LLM agent 调用。",
+    args_schema: {
+      ingredients: "string — INCI list, comma/newline separated (e.g. 'AQUA, GLYCERIN, NIACINAMIDE, SQUALANE')",
+      context: "{ population: 'adult|pregnant|child|sensitive', region: 'CN|EU|US|KR|JP|ASEAN' } (optional)",
+      lang: "'zh' | 'en' (default: from cookie)",
+    },
+    handler: async ({ ingredients, context = {}, lang = "zh" }) => {
+      return await analyzeFormula(ingredients, { context, lang });
     },
   },
   compliance_check: {
@@ -151,6 +164,7 @@ export async function GET(request) {
     examples: [
       { tool: "ingredient_query", args: { q: "RETINOL" } },
       { tool: "formula_review", args: { ingredients: ["RETINOL", "AHA", "VITAMIN_C"], context: { population: "pregnant", region: "CN" } } },
+      { tool: "formula_analyze", args: { ingredients: "AQUA, GLYCERIN, NIACINAMIDE, BIFIDA FERMENT LYSATE, SQUALANE, TOCOPHEROL, PHENOXYETHANOL", lang: "zh" } },
       { tool: "compliance_check", args: { ingredient: "HYDROQUINONE", regions: ["CN", "EU", "US", "JP"] } },
       { tool: "synbio_company", args: { id: "jinbo-bio" } },
     ],
