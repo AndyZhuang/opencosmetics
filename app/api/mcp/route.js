@@ -10,6 +10,7 @@ import { getLangFromCookies, t } from "../../../lib/i18n";
 import { analyzeFormula } from "../../../lib/formula_analyzer";
 import { findSubstitutes, listGroups } from "../../../lib/substitution";
 import { suggestFormulaFromClaim, listClaims } from "../../../lib/claim_to_formula";
+import { listReferenceFormulas, getReferenceFormula, searchReferenceFormulas } from "../../../lib/reference_formulas";
 
 const TOOLS = {
   ingredient_query: {
@@ -85,6 +86,20 @@ const TOOLS = {
     },
     handler: async ({ claim_id, concerns, population, price_tier, lang = "zh" }) => {
       return suggestFormulaFromClaim({ claim_id, concerns, population, price_tier, lang });
+    },
+  },
+  reference_formulas: {
+    description: "Search 20 curated classic commercial formulas by INCI/brand/category. Use for: 'show me niacinamide serums under $20' or 'The Ordinary formulas' or 'best ceramide creams'. Returns INCI + key actives + notes for each.",
+    description_zh: "搜索 20 经典商业配方 (按 INCI/品牌/类别)。例: '找含烟酰胺的精华' / 'The Ordinary 配方' / '最好的神经酰胺面霜'。返回 INCI + 关键活性 + 配方要点。",
+    args_schema: {
+      q: "string (search keyword: INCI/brand/category, e.g. 'NIACINAMIDE', 'The Ordinary', 'ceramide', 'serum')",
+      id: "string (specific formula id, e.g. 'the_ordinary_niacinamide_10_zinc_1')",
+      lang: "'zh' | 'en' (default: from cookie)",
+    },
+    handler: async ({ q, id, lang = "zh" }) => {
+      if (id) return getReferenceFormula(id);
+      const found = searchReferenceFormulas(q);
+      return { count: found.length, formulas: found };
     },
   },
   compliance_check: {
