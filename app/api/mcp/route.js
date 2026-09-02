@@ -8,6 +8,7 @@ import { query, queryOne, checkFormulaRisk, loadCompanies, loadRules } from "../
 import { cookies } from "next/headers";
 import { getLangFromCookies, t } from "../../../lib/i18n";
 import { analyzeFormula } from "../../../lib/formula_analyzer";
+import { findSubstitutes, listGroups } from "../../../lib/substitution";
 
 const TOOLS = {
   ingredient_query: {
@@ -57,6 +58,18 @@ const TOOLS = {
     },
     handler: async ({ ingredients, context = {}, lang = "zh" }) => {
       return await analyzeFormula(ingredients, { context, lang });
+    },
+  },
+  substitute_ingredient: {
+    description: "Find 3-5 alternative INCI ingredients with same function. Returns regulatory status (CN IECIC + EU Annex II/III), concentration limits, price tier, and notes for each alternative. Use when a key active is banned, too expensive, or unavailable for target market.",
+    description_zh: "为给定 INCI 找 3-5 个同功能替代, 含法规 + 浓度信息。用于: 某成分被禁/太贵/不可用, 需要替代方案。",
+    args_schema: {
+      inci: "string (INCI name, e.g. 'RETINOL', 'HYDROQUINONE', 'NIACINAMIDE')",
+      max_results: "number (default 5)",
+      lang: "'zh' | 'en' (default: from cookie)",
+    },
+    handler: async ({ inci, max_results = 5, lang = "zh" }) => {
+      return await findSubstitutes(inci, { max_results, lang });
     },
   },
   compliance_check: {
@@ -165,6 +178,7 @@ export async function GET(request) {
       { tool: "ingredient_query", args: { q: "RETINOL" } },
       { tool: "formula_review", args: { ingredients: ["RETINOL", "AHA", "VITAMIN_C"], context: { population: "pregnant", region: "CN" } } },
       { tool: "formula_analyze", args: { ingredients: "AQUA, GLYCERIN, NIACINAMIDE, BIFIDA FERMENT LYSATE, SQUALANE, TOCOPHEROL, PHENOXYETHANOL", lang: "zh" } },
+      { tool: "substitute_ingredient", args: { inci: "RETINOL", lang: "zh" } },
       { tool: "compliance_check", args: { ingredient: "HYDROQUINONE", regions: ["CN", "EU", "US", "JP"] } },
       { tool: "synbio_company", args: { id: "jinbo-bio" } },
     ],
