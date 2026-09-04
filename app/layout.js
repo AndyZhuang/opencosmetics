@@ -1,4 +1,5 @@
 ﻿// app/layout.js — Top nav with prominent "工具" mega-menu
+import "./globals.css";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import LangSwitcher from "../components/LangSwitcher";
