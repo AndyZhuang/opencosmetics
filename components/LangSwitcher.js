@@ -43,17 +43,21 @@ export default function LangSwitcher() {
       onClick={cycle}
       title="Toggle language / 切换语言"
       style={{
-        background: "var(--bg)",
+        background: "var(--surface)",
         border: "1px solid var(--border)",
-        borderRadius: "4px",
-        padding: "4px 10px",
+        borderRadius: "8px",
+        padding: "6px 12px",
         cursor: "pointer",
-        fontSize: "12px",
-        color: "var(--text)",
+        fontSize: "13px",
+        fontWeight: 500,
+        color: "var(--text-2)",
         display: "inline-flex",
         alignItems: "center",
         gap: "4px",
+        transition: "all 0.15s",
       }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--brand)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; }}
     >
       <span style={{ fontSize: "14px" }}>{label.icon}</span>
       <span>{displayText}</span>

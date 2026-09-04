@@ -1,24 +1,170 @@
-/* Open Cosmetics — global styles */
+/* Open Cosmetics — global styles v2 (INCIDecoder + CosDNA inspired) */
+
 :root {
-  --bg: #0f1115;
-  --panel: #1a1d24;
-  --border: #2a2e38;
-  --text: #e4e6eb;
-  --muted: #8a8e98;
-  --accent: #6e4dff;
-  --green: #2ecc71;
-  --red: #e74c3c;
-  --orange: #f39c12;
-  --blue: #3498db;
-  --yellow: #f1c40f;
+  /* Brand */
+  --brand: #6e4dff;
+  --brand-dark: #5938e8;
+  --brand-light: #f3efff;
+
+  /* Neutrals (light theme) */
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --surface-2: #f6f5f1;
+  --border: #e8e6df;
+  --border-strong: #c8c5bb;
+  --text: #1a1a1a;
+  --text-2: #4a4a4a;
+  --muted: #8a8780;
+
+  /* Semantic */
+  --green: #2ea35e;
+  --green-bg: #e6f5ec;
+  --yellow: #c98a16;
+  --yellow-bg: #fbf3e0;
+  --orange: #d96a16;
+  --orange-bg: #fbecd9;
+  --red: #d83a3a;
+  --red-bg: #fbe5e5;
+  --blue: #2069d6;
+  --blue-bg: #e3eefb;
+  --purple: #8b5cf6;
+  --purple-bg: #f0e8fb;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(20, 20, 30, 0.04);
+  --shadow: 0 1px 3px rgba(20, 20, 30, 0.06), 0 4px 12px rgba(20, 20, 30, 0.04);
+  --shadow-lg: 0 4px 12px rgba(20, 20, 30, 0.08), 0 16px 32px rgba(20, 20, 30, 0.06);
+  --shadow-hover: 0 6px 18px rgba(110, 77, 255, 0.12), 0 2px 6px rgba(20, 20, 30, 0.08);
+
+  /* Type */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
 }
+
 * { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
 body {
-  margin: 0; padding: 0;
-  background: var(--bg); color: var(--text);
-  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 14px; line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01", "tnum";
 }
-a { color: var(--blue); text-decoration: none; }
-a:hover { text-decoration: underline; }
-code { background: #20242c; padding: 1px 6px; border-radius: 3px; font-size: 12px; }
+
+a { color: var(--brand); text-decoration: none; transition: color 0.15s; }
+a:hover { color: var(--brand-dark); }
+
+code, pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface-2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text-2);
+}
+
+h1, h2, h3, h4 { color: var(--text); font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; margin: 0; }
+h1 { font-size: 32px; }
+h2 { font-size: 22px; }
+h3 { font-size: 18px; }
+
+/* Common card */
+.oc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+.oc-card:hover {
+  box-shadow: var(--shadow);
+  border-color: var(--border-strong);
+}
+
+/* Pills */
+.oc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.oc-pill-green { background: var(--green-bg); color: var(--green); }
+.oc-pill-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.oc-pill-orange { background: var(--orange-bg); color: var(--orange); }
+.oc-pill-red { background: var(--red-bg); color: var(--red); }
+.oc-pill-blue { background: var(--blue-bg); color: var(--blue); }
+.oc-pill-purple { background: var(--purple-bg); color: var(--purple); }
+.oc-pill-gray { background: var(--surface-2); color: var(--text-2); }
+
+/* Inputs */
+.oc-input {
+  font-family: var(--font-sans);
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.oc-input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(110, 77, 255, 0.15);
+}
+
+/* Buttons */
+.oc-btn {
+  font-family: var(--font-sans);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--brand);
+  color: #fff;
+  border: 0;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.oc-btn:hover { background: var(--brand-dark); box-shadow: var(--shadow-hover); }
+.oc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.oc-btn-ghost {
+  background: transparent;
+  color: var(--brand);
+  border: 1px solid var(--border);
+}
+.oc-btn-ghost:hover { background: var(--brand-light); border-color: var(--brand); }
+
+/* Score colors (4-tier) */
+.score-good    { background: var(--green-bg);  color: var(--green);  border: 1px solid #c4e4cf; }
+.score-ok      { background: var(--blue-bg);   color: var(--blue);   border: 1px solid #c0d6f1; }
+.score-caution { background: var(--yellow-bg); color: var(--yellow); border: 1px solid #ecd9a8; }
+.score-avoid   { background: var(--red-bg);    color: var(--red);    border: 1px solid #ecbcbc; }
+
+/* Tables */
+.oc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.oc-table th { text-align: left; padding: 10px 8px; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border); }
+.oc-table td { padding: 12px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.oc-table tr:last-child td { border-bottom: 0; }
+
+/* Old var shims (compat) */
+code { font-family: var(--font-mono); background: var(--surface-2); padding: 1px 6px; border-radius: 4px; font-size: 12px; color: var(--text-2); }
