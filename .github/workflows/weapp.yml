@@ -1,0 +1,82 @@
+name: WeApp & H5 Build (FormulaLab)
+
+# 配方引擎 FormulaLab — 微信小程序 / H5 产物流水线
+#
+# 产出:
+#   1) 微信小程序包 (apps/taro/dist, 直接用微信开发者工具打开即可)
+#   2) H5 静态站 (apps/taro/dist/h5, 部署到任意静态托管)
+#
+# 微信小程序的 appid 在 apps/taro/project.config.json 里配置:
+#   - 测试号: touristappid (当前默认值, 可直接用开发者工具「测试号」预览)
+#   - 正式号: 换成自己的 AppID 后再上传审核
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, main]
+    paths:
+      - "apps/taro/src/**"
+      - "apps/taro/config/**"
+      - "apps/taro/package.json"
+      - ".github/workflows/weapp.yml"
+
+concurrency:
+  group: weapp-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build WeApp + H5
+    runs-on: ubuntu-latest
+    env:
+      APP_DIR: apps/taro
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        working-directory: ${{ env.APP_DIR }}
+        run: npm install --no-audit --no-fund
+
+      - name: Type check
+        working-directory: ${{ env.APP_DIR }}
+        run: npx tsc --noEmit
+
+      - name: Encoding check
+        working-directory: ${{ env.APP_DIR }}
+        run: node ../scripts/check_taro_encodings.mjs src
+
+      - name: Build weapp + h5
+        working-directory: ${{ env.APP_DIR }}
+        run: node scripts/build.mjs weapp && node scripts/build.mjs h5
+
+      - name: Package
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          set -e
+          mkdir -p build/artifact
+          cd dist
+          zip -qr ../build/artifact/formulalab-weapp.zip . -x "h5/*"
+          cd h5
+          zip -qr ../build/artifact/formulalab-h5.zip .
+          ls -la ../build/artifact
+
+      - name: Upload weapp package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormulaLab-weapp
+          path: ${{ env.APP_DIR }}/build/artifact/formulalab-weapp.zip
+          retention-days: 30
+
+      - name: Upload h5 package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormulaLab-h5
+          path: ${{ env.APP_DIR }}/build/artifact/formulalab-h5.zip
+          retention-days: 30

@@ -1,11 +1,18 @@
 name: Android Build (FormulaLab)
 
-# 配方引擎 FormulaLab — Android APK 流水线
-# 产出:
-#   1) release APK (未签名或用 CI 里的 debug key 签名, 可直接安装到真机)
-#   2) aab (用于 Google Play / 国内应用商店上传)
+# 配方引擎 FormulaLab — Android 出包流水线
 #
-# 签名 secrets (可选): ANDROID_KEYSTORE_BASE64 / ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD
+# 工程结构: apps/taro/android (React Native 0.73 原生工程, Taro RN 外壳)
+# 出包入口: apps/taro/scripts/build-android.mjs
+#
+# 产出:
+#   1) release APK —— 没配置正式密钥时用 debug keystore 签, 可直接装到真机联调
+#   2) release AAB —— 上架 Google Play / 国内应用商店用
+#
+# 正式签名 (可选, 在仓库 Settings -> Secrets 配置):
+#   ANDROID_KEYSTORE_BASE64   keystore 文件的 base64
+#   ANDROID_KEY_ALIAS         密钥别名
+#   ANDROID_KEY_PASSWORD      密钥口令 (store 与 key 共用)
 
 on:
   workflow_dispatch:
@@ -25,7 +32,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_DIR: apps/taro
-      PACKAGE_ID: com.formulalab.app
 
     steps:
       - name: Checkout
@@ -35,10 +41,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
 
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -47,30 +51,27 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install NDK 26.1
+        # RN 的 Gradle 插件会校验 ndkVersion (android/build.gradle 里写死 26.1.10909125)
+        run: sdkmanager "ndk;26.1.10909125"
+
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/gradle-wrapper.properties') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('apps/taro/android/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.APP_DIR }}/node_modules
+          key: taro-npm-${{ runner.os }}-${{ hashFiles('${{ env.APP_DIR }}/package-lock.json') }}
 
       - name: Install deps
         working-directory: ${{ env.APP_DIR }}
         run: npm install --no-audit --no-fund
-
-      - name: Detect Android project
-        id: androidproj
-        working-directory: ${{ env.APP_DIR }}
-        run: |
-          set -e
-          AND_DIR=$(find . -maxdepth 3 -type d -name "android" | head -1)
-          if [ -z "$AND_DIR" ]; then
-            echo "::error::找不到 android 目录"
-            exit 1
-          fi
-          echo "AND_DIR=$AND_DIR" >> $GITHUB_OUTPUT
-          echo "AND_DIR=$AND_DIR"
 
       - name: Restore signing key
         if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
@@ -80,34 +81,34 @@ jobs:
           PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -e
-          AND_DIR="${{ steps.androidproj.outputs.AND_DIR }}"
-          echo "$KEYSTORE" | base64 --decode > "$AND_DIR/app/fl-release.keystore"
-          cat > "$AND_DIR/keystore.properties" <<EOF
-          storeFile=fl-release.keystore
-          storePassword=$PASSWORD
-          keyAlias=$ALIAS
-          keyPassword=$PASSWORD
+          echo "$KEYSTORE" | base64 --decode > "${{ env.APP_DIR }}/android/app/fl-release.keystore"
+          cat > "${{ env.APP_DIR }}/android/keystore.properties" <<EOF
+          FORMULALAB_KEYSTORE=fl-release.keystore
+          FORMULALAB_KEYSTORE_PASSWORD=$PASSWORD
+          FORMULALAB_KEY_ALIAS=$ALIAS
+          FORMULALAB_KEY_PASSWORD=$PASSWORD
           EOF
 
       - name: Build APK + AAB
-        working-directory: ${{ env.APP_DIR }}/${{ steps.androidproj.outputs.AND_DIR }}
+        working-directory: ${{ env.APP_DIR }}
+        run: node scripts/build-android.mjs assembleRelease bundleRelease --console=plain
+
+      - name: Collect artifacts
+        working-directory: ${{ env.APP_DIR }}/android
         run: |
           set -e
-          set -o pipefail
-          chmod +x gradlew
-          ./gradlew assembleRelease bundleRelease --no-daemon | tee ../gradle-build.log
-          find . -name "*.apk" -o -name "*.aab" | grep -v intermediates
+          find app/build/outputs -name "*.apk" -o -name "*.aab" | grep -v intermediates || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: FormulaLab-android-apk
-          path: ${{ env.APP_DIR }}/${{ steps.androidproj.outputs.AND_DIR }}/app/build/outputs/apk/**/*.apk
+          path: ${{ env.APP_DIR }}/android/app/build/outputs/apk/**/*.apk
           retention-days: 30
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: FormulaLab-android-aab
-          path: ${{ env.APP_DIR }}/${{ steps.androidproj.outputs.AND_DIR }}/app/build/outputs/bundle/**/*.aab
+          path: ${{ env.APP_DIR }}/android/app/build/outputs/bundle/**/*.aab
           retention-days: 30
