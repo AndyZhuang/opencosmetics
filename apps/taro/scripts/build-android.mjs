@@ -82,7 +82,14 @@ console.log(`[build-android] task=${task}`);
 console.log(`[build-android] sdk=${sdk}`);
 console.log(`[build-android] java=${javaHome}`);
 
-const child = spawn(gradlew, [task, ...extraArgs, '--console=plain'], {
+// --console 只能给一次, 重复给 Gradle 会直接报
+// "Multiple arguments were provided for command-line option '--console'" 并打印用法退出。
+const hasConsoleArg = extraArgs.some((a) => a.startsWith('--console'));
+const gradleArgs = hasConsoleArg
+  ? [task, ...extraArgs]
+  : [task, ...extraArgs, '--console=plain'];
+
+const child = spawn(gradlew, gradleArgs, {
   cwd: androidDir,
   env,
   stdio: 'inherit',

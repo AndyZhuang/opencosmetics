@@ -106,7 +106,9 @@ jobs:
 
       - name: Build APK + AAB
         working-directory: ${{ env.APP_DIR }}
-        run: node scripts/build-android.mjs assembleRelease bundleRelease --console=plain
+        # 不要在这里加 --console=plain: 脚本内部已经会补一份,
+        # 重复给会让 Gradle 报 "Multiple arguments were provided for '--console'"。
+        run: node scripts/build-android.mjs assembleRelease bundleRelease
 
       - name: Collect artifacts
         working-directory: ${{ env.APP_DIR }}/android
