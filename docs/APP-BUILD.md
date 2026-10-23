@@ -279,3 +279,14 @@ iOS 的签名与打包只能在 macOS 上做，所以走 GitHub Actions：
     私钥这类二进制/多行内容要自己算 base64 再传进去。
 20. **Taro 构建会清空 `outputRoot` 本身**。三端输出必须是**平级**目录
     （`dist/weapp` / `dist/h5` / `dist/rn`），嵌套的话重建小程序会连带删掉 H5 与 RN 产物。
+21. **Gradle 的 `--console` 只能给一次**。CI 和脚本各给一份的话，Gradle 8.2.1 报
+    `Multiple arguments were provided for command-line option '--console'` 后直接打印用法退出。
+22. **H5 跑在浏览器里，跨域调 API 必须有 CORS**。客户端带 `x-device-id` +
+    `Content-Type: application/json` 属于非简单请求，浏览器必然先发 OPTIONS 预检；
+    预检不回 `Access-Control-Allow-Origin` 就把整个响应拦掉，页面永远卡在骨架屏。
+    `next.config.js` 的 `headers()` 已对 `/api/:path*` 配好 ACAO / ACAM / ACAH。
+23. **H5 静态站没有 favicon 时浏览器会去请求 `/favicon.ico`** → 404。
+    `src/index.html` 用内联 SVG data-URI 图标解决，不落二进制资源。
+24. **表单控件要有 `id` 或 `name`**，否则 Chrome DevTools 报 a11y issue。
+    注意 `id` 只能给 H5：RN 的 `TextInput` 不认识 `id`（传过去会告警），小程序 `Input` 也不支持。
+    所以在组件里用 `process.env.TARO_ENV === 'h5'` 做平台判断。
