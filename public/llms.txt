@@ -1,0 +1,50 @@
+# 配方引擎 FormulaLab
+
+> 美妆配方师的工作台 —— 法规、成本、风险，一处算清。配方引擎 FormulaLab 是一个公开的美妆配方数据与计算工具站，覆盖 EU CosIng、CN IECIC、FDA 事件与 IECIC 备案数据，内置 65 条风险规则与 247 项原料画像，可直接通过 Web 使用，也有微信小程序与 iOS / Android 客户端。
+
+配方引擎 FormulaLab 帮助化妆品配方师、市场法规专员与供应链采购，在一个页面里完成「查法规 → 配成分 → 算成本 → 查风险」四件事。所有 API 免注册、免 key。
+
+## 数据规模
+
+- 10 个公开数据源，113,806 条记录
+- 覆盖地区：EU 104,574 条 · CN 9,092 条 · US 85,511 条
+- 65 条风险规则，分 7 类（配伍禁忌 / pH 安全 / 浓度上限 / 禁用禁限 / 防腐挑战 / 稳定性 / 标签宣称）
+- 247 项原料画像：INCI 名 + 中文名 + 配方角色 + 典型用量区间 + 市场价格区间
+
+> 原料价格为**估算参考值**（2025–2026 国内散装/大货市场区间，CNY/kg），非报价，落地前须按供应商报价校准。
+
+## 主要工具
+
+- [配方构建器](https://opencosmetics.top/bench)：逐条录入成分与用量，实时算成本、看规则命中、出配方结论（配方类型、活性分类、目标人群、价位带、IECIC 缺失项、角色分布）
+- [成分库](https://opencosmetics.top/ingredients)：247 项原料画像检索，14 个功效分类筛选，可按「已入 IECIC / 有价格」过滤
+- [风险审查](https://opencosmetics.top/risk)：粘贴 INCI 成分表，一键扫描规则命中并给出替代建议
+- [配方反查](https://opencosmetics.top/formula)：由目标功效反推配方骨架
+- [法规库](https://opencosmetics.top/regulatory)：EU 禁用/限用清单与限制条件
+- [中国 IECIC](https://opencosmetics.top/china)：已备案普通化妆品原料与禁限用清单
+- [FDA 事件](https://opencosmetics.top/fda)：不良事件与召回记录
+- [成分替代](https://opencosmetics.top/substitute)：同功能原料替换建议
+- [宣称合规](https://opencosmetics.top/claim)：宣称词与证据匹配
+- [参考配方](https://opencosmetics.top/reference)：商业 INCI 配方参考
+- [数据来源](https://opencosmetics.top/sources)：数据出处与快照说明
+
+## API
+
+Base URL：`https://opencosmetics.top/api`（免注册、免 key、UTF-8 JSON、已开放 CORS）
+
+- `GET /api/ingredients/search?q=niacinamide` — 原料检索
+- `POST /api/workbench/analyze` — 配方综合分析（法规 + 成本 + 风险）
+- `POST /api/risk/check` — 风险规则扫描
+- `POST /api/formula/cost` — 成本测算（三档定价：出厂价 / 建议零售价 / 批次价）
+- `GET /api/formulas` · `POST /api/formulas` — 配方草稿（按 `x-device-id` 头隔离，免注册）
+- `GET /api/stats` — 数据规模概览
+- `GET /api/mcp` — MCP server 端点（Claude / GPT 可直接调用）
+
+完整接口说明见 [docs/API.md](https://opencosmetics.top/api)，或仓库内 `docs/API.md`。
+
+## 客户端
+
+同一套代码出四端：Web、微信小程序「配方引擎」、iOS（`com.formulalab.app`）、Android（`com.formulalab.app`）。客户端默认调用同一套 API。
+
+## 许可与免责
+
+数据来自公开数据库（EU CosIng、NMPA IECIC、FDA openFDA 等），价格与 pH 均为估算值。法规判定请以官方公报与实测结果为准。
