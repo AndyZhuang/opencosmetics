@@ -1,7 +1,7 @@
 // app/sitemap.js — /sitemap.xml
 //
 // 配方引擎 FormulaLab 的站点地图。
-// 静态页面 + 原料详情页 (来自 data/ingredient_profiles.json 的 247 条画像)。
+// 静态页面 + 原料详情页 (来自 data/ingredient_profiles.json 的 243 条画像)。
 //
 // 注意: 原料详情路由是 /ingredients/[name], 后端按 INCI 名大小写不敏感匹配,
 // 所以这里用画像表里的规范 INCI 名 (如 NIACINAMIDE) 做 URL, 需 encodeURIComponent。
@@ -38,7 +38,7 @@ export default function sitemap() {
     priority,
   }));
 
-  // 原料详情页 —— 只有画像表里有的 247 个原料才有完整的用量/价格/角色画像
+  // 原料详情页 —— 只有画像表里有的 243 个原料才有完整的用量/价格/角色画像
   const ingredientEntries = profiles.rows.map((row) => ({
     url: `${BASE}/ingredients/${encodeURIComponent(row[0])}`,
     lastModified,

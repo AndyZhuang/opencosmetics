@@ -74,7 +74,7 @@ export default async function Home() {
             <div className="wb-proof">
               <span><b>CN</b> / <b>EU</b> / <b>US</b> 三区法规同步</span>
               <span><b>65</b> 条风险规则</span>
-              <span><b>247</b> 项原料价格画像</span>
+              <span><b>243</b> 项原料价格画像</span>
               <span>无需注册, 免费调用</span>
             </div>
           </div>

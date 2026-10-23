@@ -34,13 +34,13 @@ export default async function RootLayout({ children }) {
             <div className="fl-footer-meta">
               {isZh ? (
                 <>
-                  数据源: EU CosIng · CN IECIC · FDA · 65 条风险规则 · 247 项原料画像
+                  数据源: EU CosIng · CN IECIC · FDA · 65 条风险规则 · 243 项原料画像
                   <br />
                   原料价格为估算参考值, 落地前须按供应商报价校准
                 </>
               ) : (
                 <>
-                  Sources: EU CosIng · CN IECIC · FDA · 65 risk rules · 247 raw-material profiles
+                  Sources: EU CosIng · CN IECIC · FDA · 65 risk rules · 243 raw-material profiles
                   <br />
                   Raw-material prices are reference estimates — recalibrate against supplier quotes
                 </>
