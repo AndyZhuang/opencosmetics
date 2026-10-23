@@ -1,0 +1,177 @@
+name: iOS Build (FormulaLab)
+
+# 配方引擎 FormulaLab — iOS 一键出包
+# 触发方式: 手动 (workflow_dispatch) 或 push 到 main
+#
+# 产出:
+#   1) 模拟器 .app (始终产出, 无需任何证书, 用于快速验证 App 能跑起来)
+#   2) 真机 .ipa (仅当仓库配置了签名 secrets 时产出)
+#
+# 需要在仓库 Settings -> Secrets 配置 (可选, 不配也能出模拟器包):
+#   IOS_CERT_P12_BASE64   开发者证书 .p12 的 base64
+#   IOS_CERT_PASSWORD     p12 密码
+#   IOS_PROVISION_PROFILE 描述文件的 base64
+#   IOS_TEAM_ID           Apple Team ID
+#   IOS_BUNDLE_ID         Bundle ID (默认 com.formulalab.app)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_device:
+        description: "真机 IPA (需要签名 secrets) / 模拟器 .app"
+        type: choice
+        options: ["simulator", "device"]
+        default: simulator
+  push:
+    branches: [main]
+    paths:
+      - "apps/taro/**"
+      - ".github/workflows/ios.yml"
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build iOS
+    runs-on: macos-14
+    env:
+      APP_DIR: apps/taro
+      BUNDLE_ID: ${{ secrets.IOS_BUNDLE_ID || 'com.formulalab.app' }}
+      IOS_VERSION: '16.0'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
+
+      - name: Setup Ruby (for CocoaPods)
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: false
+
+      - name: Install deps
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          npm install --no-audit --no-fund
+          npx pod-install --version 1.0.0 || true
+
+      - name: Detect iOS project
+        id: iosproj
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          set -e
+          RN_DIR=$(find . -maxdepth 3 -type d -name "ios" | head -1)
+          if [ -z "$RN_DIR" ]; then
+            echo "::error::找不到 ios 目录, Taro RN 目标可能未构建"
+            exit 1
+          fi
+          WORKSPACE=$(find "$RN_DIR" -maxdepth 1 -name "*.xcworkspace" | head -1)
+          PROJECT=$(find "$RN_DIR" -maxdepth 1 -name "*.xcodeproj" | head -1)
+          SCHEME=$(xcodebuild -list -project "$PROJECT" 2>/dev/null | awk '/Schemes:/{f=1;next} f&&NF{print $1; exit}')
+          echo "RN_DIR=$RN_DIR" >> $GITHUB_OUTPUT
+          echo "WORKSPACE=$WORKSPACE" >> $GITHUB_OUTPUT
+          echo "PROJECT=$PROJECT" >> $GITHUB_OUTPUT
+          echo "SCHEME=$SCHEME" >> $GITHUB_OUTPUT
+          echo "RN_DIR=$RN_DIR SCHEME=$SCHEME"
+
+      - name: Build simulator app
+        if: ${{ github.event_name == 'push' || inputs.build_device == 'simulator' }}
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          set -e
+          RN_DIR="${{ steps.iosproj.outputs.RN_DIR }}"
+          WORKSPACE="${{ steps.iosproj.outputs.WORKSPACE }}"
+          SCHEME="${{ steps.iosproj.outputs.SCHEME }}"
+          set -o pipefail
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build | tee build/xcodebuild-sim.log
+          APP=$(find build/DerivedData/Build/Products -name "*.app" -maxdepth 3 | head -1)
+          echo "APP_PATH=$APP" >> $GITHUB_ENV
+          echo "built: $APP"
+
+      - name: Upload simulator app
+        if: ${{ steps.iosproj.outputs.RN_DIR != '' && (github.event_name == 'push' || inputs.build_device == 'simulator') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormulaLab-ios-simulator
+          path: ${{ env.APP_DIR }}/${{ env.APP_PATH }}
+          retention-days: 14
+
+      - name: Restore signing assets
+        if: ${{ inputs.build_device == 'device' }}
+        env:
+          CERT: ${{ secrets.IOS_CERT_P12_BASE64 }}
+          PROFILE: ${{ secrets.IOS_PROVISION_PROFILE }}
+        run: |
+          set -e
+          mkdir -p "${{ env.APP_DIR }}/build/certs"
+          if [ -z "$CERT" ] || [ -z "$PROFILE" ]; then
+            echo "::error::未配置 IOS_CERT_P12_BASE64 / IOS_PROVISION_PROFILE, 无法出真机包"
+            exit 1
+          fi
+          echo "$CERT" | base64 --decode > "${{ env.APP_DIR }}/build/certs/dev.p12"
+          echo "$PROFILE" | base64 --decode > "${{ env.APP_DIR }}/build/certs/Provision.mobileprovision"
+          security create-keychain -p actions -s formulalab.keychain
+          security default-keychain -s formulalab.keychain
+          security unlock-keychain -p actions
+          security import "${{ env.APP_DIR }}/build/certs/dev.p12" -k formulalab.keychain \
+            -P "${{ secrets.IOS_CERT_PASSWORD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k actions formulalab.keychain >/dev/null
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "${{ env.APP_DIR }}/build/certs/Provision.mobileprovision" \
+             ~/Library/MobileDevice/Provisioning\ Profiles/
+          # 覆盖工程里的 bundle id 与 team
+          RN_DIR="${{ steps.iosproj.outputs.RN_DIR }}"
+          find "$RN_DIR" -name "project.pbxproj" -exec \
+            sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = ${{ env.BUNDLE_ID }};/g" {} \;
+          find "$RN_DIR" -name "project.pbxproj" -exec \
+            sed -i '' "s/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = ${{ secrets.IOS_TEAM_ID }};/g" {} \;
+
+      - name: Build & export IPA
+        if: ${{ inputs.build_device == 'device' }}
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          set -e
+          RN_DIR="${{ steps.iosproj.outputs.RN_DIR }}"
+          WORKSPACE="${{ steps.iosproj.outputs.WORKSPACE }}"
+          SCHEME="${{ steps.iosproj.outputs.SCHEME }}"
+          set -o pipefail
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/FormulaLab.xcarchive \
+            -destination "generic/platform=iOS" \
+            DEVELOPMENT_TEAM="${{ secrets.IOS_TEAM_ID }}" \
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="${{ secrets.IOS_PROVISION_PROFILE_NAME || 'FormulaLab' }}" \
+            build | tee build/xcodebuild-device.log
+          mkdir -p build/ipa
+          xcodebuild -exportArchive \
+            -archivePath build/FormulaLab.xcarchive \
+            -exportOptionsPlist build/ExportOptions.plist \
+            -exportPath build/ipa
+          ls -la build/ipa
+
+      - name: Upload IPA
+        if: ${{ inputs.build_device == 'device' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormulaLab-ios-ipa
+          path: ${{ env.APP_DIR }}/build/ipa/*.ipa
+          retention-days: 30

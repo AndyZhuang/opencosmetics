@@ -52,11 +52,11 @@ REMOTE_TMP = "/tmp/opencosmetics_upload.tar.gz"
 REMOTE_DIR = "/var/www/opencosmetics"
 REMOTE_DIR_OLD = "/var/www/opencosmetics_v1"
 
-EXCLUDE_DIRS = ("node_modules", ".next", ".git")
+EXCLUDE_DIRS = ("node_modules", ".next", ".git", "dist", ".taro", ".rnbundle", "apps")
 EXCLUDE_PATTERNS = (
     "scripts", "test_*.py", "demo_*.py", "show_*.py", "list_*.py",
     "fix_*.py", "check_*.py", "claim_*.json", "*.out",
-    "*.tsbuildinfo", "*.err", "*.log",
+    "*.tsbuildinfo", "*.err", "*.log", "*.tar.gz",
 )
 EXCLUDE_SUFFIXES = (".err", ".log")
 
@@ -173,16 +173,31 @@ def start_service():
 
 
 def verify():
-    print("[9/9] Verifying 11 endpoints...")
-    paths = ["/", "/china", "/ingredients", "/risk", "/regulatory", "/fda", "/sources", "/formula", "/substitute", "/claim", "/reference", "/scan", "/trends", "/api/mcp", "/api/stats"]
+    print("[9/9] Verifying endpoints...")
+    paths = [
+        "/", "/bench", "/formulas", "/china", "/ingredients", "/risk", "/regulatory",
+        "/fda", "/sources", "/formula", "/substitute", "/claim", "/reference", "/scan",
+        "/trends", "/api/mcp", "/api/stats",
+        "/api/workbench/analyze", "/api/ingredients/search", "/api/formula/cost",
+        "/api/formulas", "/api/formula/compare", "/api/formula/export",
+    ]
     for p in paths:
         code, _ = ssh(f"curl -s -o /dev/null -w '%{{http_code}}' http://127.0.0.1:3000{p}", timeout=10)
         flag = "OK" if code == "200" else "!!"
-        print(f"  {flag} {p:<22} -> {code}")
+        print(f"  {flag} {p:<28} -> {code}")
+    # POST 冒烟: 工作台分析 + 成本
+    post = (
+        "curl -s -X POST http://127.0.0.1:3000/api/workbench/analyze "
+        "-H 'Content-Type: application/json' "
+        "-d '{\"ingredients\":\"AQUA, GLYCERIN, NIACINAMIDE\"}' "
+        "-o /dev/null -w '%{http_code}'"
+    )
+    code, _ = ssh(post, timeout=30)
+    print(f"  {'OK' if code.strip() == '200' else '!!'} POST /api/workbench/analyze -> {code.strip()}")
     # Test public HTTPS too
     print("\n  Public HTTPS:")
     import urllib.request
-    for p in ["/", "/formula", "/scan", "/trends", "/api/mcp"]:
+    for p in ["/", "/bench", "/formulas", "/formula", "/api/mcp"]:
         try:
             r = urllib.request.urlopen(f"https://opencosmetics.top{p}", timeout=15)
             print(f"  OK https://opencosmetics.top{p:<14} -> {r.status}")

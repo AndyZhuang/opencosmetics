@@ -78,3 +78,10 @@ mcp-server/node_modules/
 node_modules/
 
 data/bebd_v4.duckdb
+
+# 运行时草稿 (每台设备一份, 不入库)
+data/saved_formulas/
+
+# 本地部署包
+opencosmetics_deploy.tar.gz
+*.tar.gz

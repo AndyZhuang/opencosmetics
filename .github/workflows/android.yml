@@ -1,0 +1,113 @@
+name: Android Build (FormulaLab)
+
+# 配方引擎 FormulaLab — Android APK 流水线
+# 产出:
+#   1) release APK (未签名或用 CI 里的 debug key 签名, 可直接安装到真机)
+#   2) aab (用于 Google Play / 国内应用商店上传)
+#
+# 签名 secrets (可选): ANDROID_KEYSTORE_BASE64 / ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/taro/**"
+      - ".github/workflows/android.yml"
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Android
+    runs-on: ubuntu-latest
+    env:
+      APP_DIR: apps/taro
+      PACKAGE_ID: com.formulalab.app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/gradle-wrapper.properties') }}
+
+      - name: Install deps
+        working-directory: ${{ env.APP_DIR }}
+        run: npm install --no-audit --no-fund
+
+      - name: Detect Android project
+        id: androidproj
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          set -e
+          AND_DIR=$(find . -maxdepth 3 -type d -name "android" | head -1)
+          if [ -z "$AND_DIR" ]; then
+            echo "::error::找不到 android 目录"
+            exit 1
+          fi
+          echo "AND_DIR=$AND_DIR" >> $GITHUB_OUTPUT
+          echo "AND_DIR=$AND_DIR"
+
+      - name: Restore signing key
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -e
+          AND_DIR="${{ steps.androidproj.outputs.AND_DIR }}"
+          echo "$KEYSTORE" | base64 --decode > "$AND_DIR/app/fl-release.keystore"
+          cat > "$AND_DIR/keystore.properties" <<EOF
+          storeFile=fl-release.keystore
+          storePassword=$PASSWORD
+          keyAlias=$ALIAS
+          keyPassword=$PASSWORD
+          EOF
+
+      - name: Build APK + AAB
+        working-directory: ${{ env.APP_DIR }}/${{ steps.androidproj.outputs.AND_DIR }}
+        run: |
+          set -e
+          set -o pipefail
+          chmod +x gradlew
+          ./gradlew assembleRelease bundleRelease --no-daemon | tee ../gradle-build.log
+          find . -name "*.apk" -o -name "*.aab" | grep -v intermediates
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormulaLab-android-apk
+          path: ${{ env.APP_DIR }}/${{ steps.androidproj.outputs.AND_DIR }}/app/build/outputs/apk/**/*.apk
+          retention-days: 30
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormulaLab-android-aab
+          path: ${{ env.APP_DIR }}/${{ steps.androidproj.outputs.AND_DIR }}/app/build/outputs/bundle/**/*.aab
+          retention-days: 30
