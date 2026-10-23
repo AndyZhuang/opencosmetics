@@ -43,8 +43,9 @@ jobs:
     name: Deploy to production
     runs-on: ubuntu-latest
     env:
-      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      # secrets 内容
+      SSH_KEY_CONTENT: ${{ secrets.DEPLOY_SSH_KEY }}
+      KNOWN_HOSTS_CONTENT: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
 
     steps:
       - name: Checkout
@@ -64,10 +65,13 @@ jobs:
         run: |
           set -e
           mkdir -p ~/.ssh
-          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KEY_CONTENT" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf '%s\n' "$KNOWN_HOSTS_CONTENT" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
+          # deploy.py 里的 DEPLOY_SSH_KEY / DEPLOY_KNOWN_HOSTS 要的是**路径**, 不是内容
+          echo "DEPLOY_SSH_KEY=$HOME/.ssh/id_ed25519" >> $GITHUB_ENV
+          echo "DEPLOY_KNOWN_HOSTS=$HOME/.ssh/known_hosts" >> $GITHUB_ENV
 
       - name: Deploy
         run: python scripts/deploy.py
