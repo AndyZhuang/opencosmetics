@@ -72,15 +72,20 @@ npm install
 node scripts/build.mjs weapp
 ```
 
-产物：`apps/taro/dist/`（约 430 KB，51 个文件）
+产物：`apps/taro/dist/weapp/`（约 430 KB，51 个文件）
 
 ```
-dist/
+dist/weapp/
 ├── app.js / app.json / app.wxss
-├── project.config.json
+├── project.config.json          (Taro 自动生成, miniprogramRoot = "./")
 ├── pages/{workbench,bench,ingredients,risk,formulas,substitute,claim,reference}/...
 └── base.wxml / common.js / common.wxss / taro.js / vendors.js ...
 ```
+
+> **为什么是 `dist/weapp/` 而不是 `dist/`**
+> Taro 每次构建会清空 `outputRoot` **本身**。早先小程序用 `dist/`、H5 用 `dist/h5/`，
+> 于是「构建小程序」会把整个 `dist/` 清空 —— H5 与 RN 产物一起消失（真踩过）。
+> 现在改成三个平级目录，各平台只清自己那一个，互不干扰。
 
 ### 2.2 换成正式 AppID
 
@@ -91,11 +96,13 @@ dist/
 ```
 
 然后重新 `node scripts/build.mjs weapp`（Taro 会把工程配置拷进产物目录）。
+也可以用环境变量临时覆盖：`$env:TARO_APP_ID='wx1234567890abcdef'`。
 
 ### 2.3 上传
 
-1. 打开 **微信开发者工具** → 导入项目 → 目录选 `apps/taro/`（不是 `dist/`，
-   因为 `project.config.json` 里的 `miniprogramRoot` 指向 `./dist/`）。
+1. 打开 **微信开发者工具** → 导入项目 → 目录选 `apps/taro/`
+   （根目录的 `project.config.json` 里 `miniprogramRoot` 指向 `./dist/weapp/`），
+   也可以直接导入 `apps/taro/dist/weapp/`（里面那份的 `miniprogramRoot` 是 `./`）。
 2. 工具内「上传」→ 填版本号与备注。
 3. 登录 mp.weixin.qq.com → **版本管理** → 提交审核。
 
@@ -119,7 +126,7 @@ node scripts/build.mjs h5
 $env:TARO_H5_PUBLIC_PATH='/m/'; node scripts/build.mjs h5
 ```
 
-小程序与 H5 的产物目录是**隔离**的（`dist/` vs `dist/h5/`），互不覆盖。
+小程序与 H5 的产物目录是**隔离**的（`dist/weapp/` vs `dist/h5/`），互不覆盖。
 
 ---
 
@@ -213,6 +220,13 @@ iOS 的签名与打包只能在 macOS 上做，所以走 GitHub Actions：
 | `.github/workflows/weapp.yml` | push 改 `apps/taro/src` | `formulalab-weapp.zip` / `formulalab-h5.zip` |
 | `.github/workflows/android.yml` | push 改 `apps/taro/**` | `FormulaLab-android-apk` / `-aab` |
 | `.github/workflows/ios.yml` | push / 手动 | `FormulaLab-ios-simulator`（可选 `-ipa`） |
+| `.github/workflows/deploy-web.yml` | push 改 `app/**` 等 | 直接部署到 opencosmetics.top |
+
+### 部署流水线的两个坑
+
+- **私钥用 base64 存 Secret**（`DEPLOY_SSH_KEY_B64`），CI 里 `tr -d '\r\n' | base64 --decode`。
+- **`DEPLOY_SSH_KEY` / `DEPLOY_KNOWN_HOSTS` 两个环境变量要的是「路径」不是「内容」**，
+  `scripts/deploy.py` 读的是文件路径。
 
 ---
 
@@ -252,3 +266,16 @@ iOS 的签名与打包只能在 macOS 上做，所以走 GitHub Actions：
 15. **`@tarojs/components-rn` 与 `@tarojs/taro-rn` 的 barrel 会无差别 re-export 全部组件**，
     其中 expo-camera / react-native-maps 等重量级模块我们一个都不用。
     `src/rn-stubs/native-unavailable.ts` + `config/index.ts` 的 `rn.alias` 把它们换成占位桩。
+16. **JDK 判活要跨平台**。`scripts/build-android.mjs` 早先只认 `bin/java.exe`，
+    在 ubuntu runner 上直接报「JAVA_HOME 未设置或无效」。现在同时接受 `bin/java` 与 `bin/java.exe`。
+17. **`gradlew` 在 git 里是 100644**（Windows 保留不了可执行位），
+    Linux runner 上 `./gradlew` 会 `Permission denied`。
+    已用 `git update-index --chmod=+x` 修成 100755，脚本里也补了运行时 `chmod 755` 兜底。
+18. **Windows 上生成的 base64 secret 在 Linux 上解码会炸**。
+    CRLF 里的 `\r` 不是合法 base64 字符，GNU `base64 --decode` 直接报
+    `base64: invalid input`。CI 里必须 `tr -d '\r\n' | base64 --decode`。
+    同理 `known_hosts` 的 CRLF 会让主机密钥列带上 `\r`，`StrictHostKeyChecking=yes` 必挂。
+19. **`gh secret set --body` 设的是字面量**，不是文件内容。
+    私钥这类二进制/多行内容要自己算 base64 再传进去。
+20. **Taro 构建会清空 `outputRoot` 本身**。三端输出必须是**平级**目录
+    （`dist/weapp` / `dist/h5` / `dist/rn`），嵌套的话重建小程序会连带删掉 H5 与 RN 产物。
