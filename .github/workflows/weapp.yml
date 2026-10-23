@@ -60,21 +60,21 @@ jobs:
         working-directory: ${{ env.APP_DIR }}
         run: |
           set -e
-          mkdir -p "$GITHUB_WORKSPACE/build/artifact"
-          ( cd dist && zip -qr "$GITHUB_WORKSPACE/build/artifact/formulalab-weapp.zip" . -x "h5/*" "rn/*" )
-          ( cd dist/h5 && zip -qr "$GITHUB_WORKSPACE/build/artifact/formulalab-h5.zip" . )
-          ls -la "$GITHUB_WORKSPACE/build/artifact"
+          mkdir -p build/artifact
+          ( cd dist && zip -qr "$GITHUB_WORKSPACE/${{ env.APP_DIR }}/build/artifact/formulalab-weapp.zip" . -x "h5/*" "rn/*" )
+          ( cd dist/h5 && zip -qr "$GITHUB_WORKSPACE/${{ env.APP_DIR }}/build/artifact/formulalab-h5.zip" . )
+          ls -la build/artifact
 
       - name: Upload weapp package
         uses: actions/upload-artifact@v4
         with:
           name: FormulaLab-weapp
-          path: ${{ env.APP_DIR }}/../build/artifact/formulalab-weapp.zip
+          path: ${{ env.APP_DIR }}/build/artifact/formulalab-weapp.zip
           retention-days: 30
 
       - name: Upload h5 package
         uses: actions/upload-artifact@v4
         with:
           name: FormulaLab-h5
-          path: ${{ env.APP_DIR }}/../build/artifact/formulalab-h5.zip
+          path: ${{ env.APP_DIR }}/build/artifact/formulalab-h5.zip
           retention-days: 30
