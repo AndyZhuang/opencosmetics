@@ -1,0 +1,12 @@
+# 仓库内文本文件一律 LF。
+#
+# 为什么: GitHub Actions 在 Linux / macOS runner 上**直接执行**仓库里的 shell 脚本
+# (gradlew / deploy_remote.sh)。这些文件一旦是 CRLF, shebang 会变成 "/bin/sh^M",
+# 报 "bad interpreter: /bin/sh^M" 直接失败。
+#
+# 本机 core.autocrlf=true, checkout 时会把 LF 转成 CRLF, 所以必须用这个文件钉死。
+* text=auto eol=lf
+
+# Windows 批处理反过来, 必须是 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf

@@ -65,9 +65,13 @@ jobs:
         run: |
           set -e
           mkdir -p ~/.ssh
-          printf '%s' "$SSH_KEY_B64" | base64 --decode > ~/.ssh/id_ed25519
+          # secret 是在 Windows 上生成的, 可能带 CRLF; base64 解码器遇到 \r 会报
+          # "base64: invalid input", 所以先 tr 掉所有换行符再解码。
+          printf '%s' "$SSH_KEY_B64" | tr -d '\r\n' | base64 --decode > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "$KNOWN_HOSTS_CONTENT" > ~/.ssh/known_hosts
+          # known_hosts 同理: CRLF 会让第三列主机密钥带上 \r, ssh 校验直接失败
+          printf '%s' "$KNOWN_HOSTS_CONTENT" | tr -d '\r' > ~/.ssh/known_hosts
+          printf '\n' >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           # deploy.py 里的 DEPLOY_SSH_KEY / DEPLOY_KNOWN_HOSTS 要的是**路径**, 不是内容
           echo "DEPLOY_SSH_KEY=$HOME/.ssh/id_ed25519" >> $GITHUB_ENV

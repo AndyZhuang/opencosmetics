@@ -41,13 +41,29 @@ if (!fs.existsSync(sdk)) {
 }
 
 const javaHome = process.env.JAVA_HOME;
-if (!javaHome || !fs.existsSync(path.join(javaHome, 'bin', 'java.exe'))) {
+// JDK 判活要跨平台: Windows 是 bin\java.exe, Linux/macOS 是 bin/java。
+// (之前只认 java.exe, 在 GitHub Actions 的 ubuntu runner 上直接判定 JAVA_HOME 无效)
+const javaBin =
+  javaHome &&
+  ['bin/java', 'bin/java.exe'].some((rel) => fs.existsSync(path.join(javaHome, rel)));
+if (!javaHome || !javaBin) {
   console.error('[build-android] JAVA_HOME 未设置或无效 (需要 JDK 17)');
+  console.error(`  当前 JAVA_HOME=${javaHome || '(未设置)'}`);
   process.exit(1);
 }
 
 const isWin = process.platform === 'win32';
 const gradlew = path.join(androidDir, isWin ? 'gradlew.bat' : 'gradlew');
+
+// gradlew 在 git 里是 100644 (Windows 上无法保留可执行位), 在 Linux runner 上
+// 会直接 "Permission denied"。这里运行时补一下执行位。
+if (!isWin) {
+  try {
+    fs.chmodSync(gradlew, 0o755);
+  } catch (e) {
+    console.warn(`[build-android] chmod gradlew 失败: ${e.message}`);
+  }
+}
 
 const env = {
   ...process.env,
