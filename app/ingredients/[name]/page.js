@@ -4,6 +4,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { t, getLangFromCookies } from "../../../lib/i18n";
 import { translateFunctions, translateRestriction } from "../../../lib/cosing_l10n";
+import { enrichIngredient } from "../../../lib/ingredient_profiles";
+import { checkFormulaRisk } from "../../../lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -67,10 +69,79 @@ export default async function IngredientDetail({ params }) {
 
   const pc0 = pc[0];
 
+  // 配方画像: 角色 / 典型用量 / 价格区间
+  const profile = enrichIngredient(canonical);
+  // 该成分单独使用会命中哪些风险规则
+  const soloRisk = checkFormulaRisk([canonical], { lang, population: "adult" });
+  const soloFindings = (soloRisk.findings || []).map((f) => ({
+    id: f.id,
+    severity: f.severity || "info",
+    category: f.category,
+    text:
+      (typeof f.rationale === "object" ? f.rationale?.zh : f.rationale) ||
+      (typeof f.status === "object" ? f.status?.zh : f.status) ||
+      (typeof f.label_requirement === "object" ? f.label_requirement?.zh : f.label_requirement) ||
+      null,
+  }));
+
   return (
     <div>
       <Link href="/ingredients" style={{ fontSize: "13px" }}>{t("ingredients.back", lang)}</Link>
-      <h1 style={{ marginTop: "12px" }}>{canonical}</h1>
+      <h1 style={{ marginTop: "12px", fontFamily: "var(--font-mono)" }}>{canonical}</h1>
+      {profile.chinese_name && (
+        <div style={{ color: "var(--muted)", fontSize: "14px", marginTop: 2 }}>{profile.chinese_name}</div>
+      )}
+
+      {/* ---- 配方画像 ---- */}
+      <div className="bench-card" style={{ margin: "20px 0" }}>
+        <div className="bench-card-head">
+          <h3>配方画像</h3>
+          <span className="meta">{profile.role_is_estimated ? "角色为模式推断" : "来自原料画像库"}</span>
+        </div>
+        <div className="bench-facts">
+          <div className="bench-fact">
+            <span className="k">配方角色</span>
+            <span className="v">
+              <span className="bench-role" data-role={profile.role}>{profile.role}</span>
+            </span>
+          </div>
+          <div className="bench-fact">
+            <span className="k">典型使用浓度</span>
+            <span className="v num">
+              {profile.use_min != null ? `${profile.use_min} – ${profile.use_max}%` : "—"}
+            </span>
+          </div>
+          <div className="bench-fact">
+            <span className="k">参考价格</span>
+            <span className="v num">
+              {profile.price_lo != null ? `¥${profile.price_lo} – ${profile.price_hi} /kg` : "—"}
+            </span>
+          </div>
+          <div className="bench-fact">
+            <span className="k">单用会命中的规则</span>
+            <span className="v num">{soloFindings.length} 条</span>
+          </div>
+        </div>
+        {soloFindings.length > 0 && (
+          <div className="bench-notes">
+            {soloFindings.map((f) => (
+              <div className="bench-note" key={f.id}>
+                <span className={`bench-note-dot ${f.severity === "block" ? "block" : f.severity === "warn" ? "warn" : "info"}`} />
+                <span className="body">
+                  <b style={{ color: "var(--ink)", fontFamily: "var(--font-mono)", fontSize: 11 }}>{f.id}</b>{" "}
+                  {f.text || f.category}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="bench-foot">
+          <span className="bench-total">
+            把这个成分加进配方里 →
+          </span>
+          <Link className="oc-btn oc-btn-sm" href="/bench">在构建器中试用</Link>
+        </div>
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", margin: "24px 0" }}>
         <section>

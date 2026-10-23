@@ -10,7 +10,7 @@ name: Android Build (FormulaLab)
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [master, main]
     paths:
       - "apps/taro/**"
       - ".github/workflows/android.yml"

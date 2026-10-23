@@ -23,7 +23,7 @@ on:
         options: ["simulator", "device"]
         default: simulator
   push:
-    branches: [main]
+    branches: [master, main]
     paths:
       - "apps/taro/**"
       - ".github/workflows/ios.yml"
