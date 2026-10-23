@@ -322,6 +322,20 @@ if (!process.argv.includes('--only-android')) {
 }
 
 // ---------------------------------------------------------------------------
+// 应用图标
+// ---------------------------------------------------------------------------
+// RN 模板的 iOS AppIcon.appiconset 里一张图都没有 (只有 Contents.json),
+// 编译出来连 Assets.car 都没有 —— 提交 App Store 会因缺 1024×1024 图标被拒;
+// Android 侧则还是 RN 默认的绿色机器人 logo。
+// 而且本脚本会整体重建 android/ 与 ios/, 图标必须在重建之后注入, 否则会被抹掉。
+const { generateIcons } = await import('./make-icons.mjs');
+const iconResult = generateIcons(iosDst, androidDst);
+console.log(
+  `[setup-native] 图标     -> ios=${iconResult.ios ? 'ok' : 'skip'} ` +
+    `android=${iconResult.android ? 'ok' : 'skip'}`
+);
+
+// ---------------------------------------------------------------------------
 // react-native.config.js —— 告诉 RN CLI 自定义入口与资源目录
 // ---------------------------------------------------------------------------
 fs.writeFileSync(

@@ -10,3 +10,15 @@
 # Windows 批处理反过来, 必须是 CRLF
 *.bat text eol=crlf
 *.cmd text eol=crlf
+
+# 二进制资源: 不做任何行尾/文本转换
+# (应用图标 PNG 由 apps/taro/scripts/make-icons.mjs 生成, 打进 APK 与 iOS .app)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.keystore binary
+*.jks binary
+*.p12 binary
+*.mobileprovision binary

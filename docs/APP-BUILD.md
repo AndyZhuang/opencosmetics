@@ -216,6 +216,38 @@ iOS 的签名与打包只能在 macOS 上做，所以走 GitHub Actions：
 
 然后手动触发 workflow 选 `device`，artifact 里就是 `FormulaLab-ios-ipa/*.ipa`。
 
+### 5.4 应用图标
+
+图标不是图片素材，而是**脚本现画的**：`apps/taro/scripts/make-icons.mjs`。
+
+- 纯 Node 实现（只用内置 `zlib` 做 PNG 的 deflate），不装 `sharp` / `canvas`
+- 自己写 PNG 编码（IHDR + IDAT + IEND + CRC32）和通用多边形扫描线光栅化
+- 4× 超采样抗锯齿，小尺寸下发丝也不毛
+- 设计：墨蓝→靛紫→品红→玫瑰的对角渐变底 + 白色水滴（化妆品直觉）+
+  水滴里的三节点分子结构（配方/化学直觉）；水滴 = 大圆 + 顶端小圆的**凸包**，所以是圆头不是尖角
+
+产出：
+
+| 端 | 文件 | 尺寸 |
+|---|---|---|
+| iOS | `ios/FormulaLab/Images.xcassets/AppIcon.appiconset/icon-*.png` | 9 个（20/29/40/60 @2x,@3x + 1024） |
+| Android | `android/app/src/main/res/mipmap-*/ic_launcher.png` / `ic_launcher_round.png` | 5 档密度（48/72/96/144/192） |
+
+单独生成：
+
+```bash
+cd apps/taro
+node scripts/make-icons.mjs                 # 写进 ../ios 与 ../android
+node scripts/make-icons.mjs --out ./preview # 只导预览图
+```
+
+> **iOS 图标必须用 RGB（colorType 2）输出** —— App Store 拒绝带 alpha 通道的图标。
+> Android 那两个用 RGBA（圆形/圆角外的部分透明）。
+>
+> **iOS 的 `Contents.json` 必须写 `filename` 字段** —— 不写 `actool` 一张图都不会编译，
+> 产物里连 `Assets.car` 都没有，而 `Assets.car` 缺失又不会被当作错误，悄无声息地失败。
+> 排查方法：解包 `.app` 看有没有 `Assets.car`。
+
 ---
 
 ## 6. 自动化流水线总览
@@ -321,3 +353,13 @@ iOS 的签名与打包只能在 macOS 上做，所以走 GitHub Actions：
 32. **`gh run download` 拉 artifact 在本机极慢**（~5 KB/s，8MB 的模拟器包要 20+ 分钟）。
     排查问题优先用 `gh api .../runs/<id>/artifacts` 拿元信息，
     产物本体让用户在 GitHub 网页端下载。
+33. **RN 模板的 iOS `AppIcon.appiconset` 里一张图都没有**。只有 `Contents.json`，
+    而且 `images` 数组里**没有 `filename` 字段** —— `actool` 见到没有 filename 的条目
+    会直接跳过，连 `Assets.car` 都不会生成，而**这不会报错**，构建照样绿。
+    产物里没有 `Assets.car` → 提交 App Store 会因缺 1024×1024 图标被拒。
+    排查方法：解包 `.app` 看根目录有没有 `Assets.car`。
+34. **iOS 图标不能带 alpha 通道**。App Store 审核会拒。PNG 要按 colorType 2（RGB）输出，
+    不是常规的 6（RGBA）。Android 那边的 `ic_launcher` 反倒要 RGBA（圆角/圆形外透明）。
+35. **`setup-native.js` 会整体重建 `android/` 和 `ios/`**（`rmrf` + `copyDir`）。
+    所以图标、bundle id、`.xcode.env` 这些**不能手工放进原生目录** ——
+    手工放的下次重建就没了。必须让脚本在重建之后注入（`make-icons.mjs` 就是这么接的）。
