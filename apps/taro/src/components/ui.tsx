@@ -324,11 +324,13 @@ export function SearchInput({
   onInput,
   placeholder = '搜索',
   onConfirm,
+  id,
 }: {
   value: string
   onInput: (v: string) => void
   placeholder?: string
   onConfirm?: () => void
+  id?: string
 }) {
   return (
     <View className="search">
@@ -344,6 +346,9 @@ export function SearchInput({
         confirmType="search"
         onInput={(e) => onInput(e.detail.value)}
         onConfirm={onConfirm}
+        // id / name 只在 H5 给: 浏览器要求表单控件有 id 或 name 才不报 a11y issue,
+        // 而 React Native 的 TextInput 不认识 id (传过去会告警), 小程序 Input 也不支持。
+        {...(process.env.TARO_ENV === 'h5' ? { id, name: id } : {})}
       />
       {value ? (
         <View className="search-clear" onClick={() => onInput('')}>

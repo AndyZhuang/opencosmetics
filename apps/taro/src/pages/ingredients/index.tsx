@@ -94,6 +94,7 @@ export default function IngredientsPage() {
     <PageShell title="成分库" subtitle="CosIng + IECIC + 原料画像" tab>
       <View className="bn-search-wrap">
         <SearchInput
+          id="formulalab-ingredient-search"
           value={q}
           onInput={setQ}
           placeholder="搜 INCI 或中文名, 如 niacinamide / 烟酰胺"

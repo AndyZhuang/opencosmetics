@@ -127,6 +127,7 @@ export default function WorkbenchPage() {
       {/* 全局搜索 */}
       <View className="wb-search-wrap">
         <SearchInput
+          id="formulalab-search"
           value={query}
           onInput={onSearch}
           placeholder="搜成分名或中文名, 如 NIACINAMIDE / 烟酰胺"
