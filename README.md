@@ -30,12 +30,16 @@
 | 端 | 形态 | 位置 | 说明 |
 |---|---|---|---|
 | **Web** | Next.js 15 (App Router) | `app/` | 工作台 / 构建器 / 我的配方 / 10 个专业工具 |
-| **微信小程序** | Taro 4 (React) | `apps/taro/` → `dist/` | 测试号即可预览,填 AppID 后可发布 |
+| **微信小程序** | Taro 4 (React) | `apps/taro/` → `dist/weapp/` | 测试号即可预览,填 AppID 后可发布 |
 | **H5** | Taro 4 (React) | `apps/taro/` → `dist/h5/` | 同一套组件,移动端浏览器直接用 |
-| **iOS** | Taro RN → Xcode | `.github/workflows/ios.yml` | 云端 CI 一键出 `.ipa` |
-| **Android** | Taro RN → Gradle | `.github/workflows/android.yml` | 云端 CI 出 `.apk` / `.aab` |
+| **iOS** | Taro RN → Xcode | `apps/taro/` → `dist/rn/` | 云端 CI 一键出 `.ipa` |
+| **Android** | Taro RN → Gradle | `apps/taro/` → `dist/rn/` | 云端 CI 出 `.apk` / `.aab` |
 
 小程序 / H5 / iOS / Android **共用同一份 Taro 组件代码**,后端 API 一份。
+
+> 三端产物是三个**平级**目录(`dist/weapp` / `dist/h5` / `dist/rn`)。
+> Taro 每次构建会清空 `outputRoot` 本身,若嵌套成 `dist/` 与 `dist/h5/`,
+> 重建小程序会把 H5 产物一起删掉。
 
 ---
 
@@ -143,6 +147,9 @@ npm run dev      # http://localhost:3000
 - **APIRoute 的相对导入层级**:4 层用 `../../../../lib`,3 层用 `../../../lib`。
 - **Next 15 production build 后必须 `next build` → `next start`**,改源码不会热更新。
 - **不写 `document` / `window` / `localStorage`**,小程序无 DOM;统一用 `Taro.*`。
+- **API 必须开 CORS**。H5 版跑在浏览器里,带 `x-device-id` + `Content-Type: application/json`
+  属于非简单请求,浏览器必然先发 OPTIONS 预检;`next.config.js` 的 `headers()` 已对
+  `/api/:path*` 配好 ACAO / ACAM / ACAH,改配置时别把这块弄丢。
 
 ---
 
