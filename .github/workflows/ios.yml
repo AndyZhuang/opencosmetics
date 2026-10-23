@@ -104,7 +104,13 @@ jobs:
         run: |
           set -e
           set -o pipefail
+          # build/ 是日志输出目录, 干净检出时并不存在 ——
+          # 不先建好, tee 会立刻报 "No such file or directory" 并让整个 step 挂掉。
+          mkdir -p build build/artifact
           rm -rf build/DerivedData
+          # xcodebuild 会把每条编译命令都打出来, 直接 tee 到 stdout 会产生几十 MB 的
+          # Actions 日志, 排查时根本翻不动。改成写文件, 失败时只回显错误行 + 尾部。
+          set +e
           xcodebuild \
             -workspace ios/FormulaLab.xcworkspace \
             -scheme "${{ env.SCHEME }}" \
@@ -114,8 +120,19 @@ jobs:
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            build | tee build/xcodebuild-sim.log
-          mkdir -p build/artifact
+            build > build/xcodebuild-sim.log 2>&1
+          RC=$?
+          set -e
+          if [ $RC -ne 0 ]; then
+            echo "::group::xcodebuild failed (exit=$RC) — 错误行"
+            grep -nE 'error:|error generated|The following build commands failed|Command .* failed|BUILD FAILED' build/xcodebuild-sim.log | tail -40 || true
+            echo "::endgroup::"
+            echo "::group::日志尾部"
+            tail -40 build/xcodebuild-sim.log || true
+            echo "::endgroup::"
+            exit $RC
+          fi
+          echo "xcodebuild OK"
           APP=$(find build/DerivedData/Build/Products -maxdepth 3 -name "*.app" | head -1)
           echo "APP=$APP"
           test -n "$APP"
