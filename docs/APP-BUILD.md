@@ -196,6 +196,11 @@ iOS 的签名与打包只能在 macOS 上做，所以走 GitHub Actions：
 `simulator` 模式产出 `FormulaLab-simulator.app.zip`（Release 配置，含 JS bundle，
 不需要任何证书），下载后解压用 Xcode 模拟器打开即可。
 
+> **已验证跑绿**（2026-10-23）：run `39922315153` 全步骤 success，
+> artifact `FormulaLab-ios-simulator` 8.4 MB，DerivedData 缓存 605 MB。
+> 首次构建 ~13 分钟（Pod install 2min + 编译 11min），缓存命中后只要 2–3 分钟。
+> 整个 iOS 链路不需要本地 Mac。
+
 ### 5.3 出真机 IPA
 
 在仓库 **Settings → Secrets** 里加：
@@ -306,3 +311,13 @@ iOS 的签名与打包只能在 macOS 上做，所以走 GitHub Actions：
 29. **Xcode DerivedData 可以缓存**。RN 的 Pod 全要现编，冷构建 15+ 分钟；
     DerivedData 里是编译产物且 runner 上绝对路径稳定，缓存后重建只要 2–3 分钟。
     cache key 带上 `project.pbxproj` / `Podfile.lock` / `package-lock.json` 的指纹。
+30. **缓存目录不能在 build 步骤开头 `rm -rf`（自己把缓存作废了）**。
+    恢复的 DerivedData 就落在 `apps/taro/build/DerivedData`，构建脚本第一行
+    `rm -rf build/DerivedData` 会把刚恢复的缓存删掉 —— 结果是每次都是冷构建，
+    缓存条目存了 605MB 但命中率为 0。现在改成不清缓存；
+    并加了一层兜底：带缓存构建失败时删掉缓存冷构建重试一次。
+31. **失败重试不能吞掉退出码**。`xcodebuild` 失败后要 `exit $RC`，
+    否则 step 会被判成 success，CI 显示绿灯但根本没有产物。
+32. **`gh run download` 拉 artifact 在本机极慢**（~5 KB/s，8MB 的模拟器包要 20+ 分钟）。
+    排查问题优先用 `gh api .../runs/<id>/artifacts` 拿元信息，
+    产物本体让用户在 GitHub 网页端下载。

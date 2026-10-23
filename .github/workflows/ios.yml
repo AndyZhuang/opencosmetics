@@ -107,29 +107,48 @@ jobs:
           # build/ 是日志输出目录, 干净检出时并不存在 ——
           # 不先建好, tee 会立刻报 "No such file or directory" 并让整个 step 挂掉。
           mkdir -p build build/artifact
-          rm -rf build/DerivedData
           # xcodebuild 会把每条编译命令都打出来, 直接 tee 到 stdout 会产生几十 MB 的
           # Actions 日志, 排查时根本翻不动。改成写文件, 失败时只回显错误行 + 尾部。
-          set +e
-          xcodebuild \
-            -workspace ios/FormulaLab.xcworkspace \
-            -scheme "${{ env.SCHEME }}" \
-            -configuration Release \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath build/DerivedData \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            build > build/xcodebuild-sim.log 2>&1
-          RC=$?
-          set -e
-          if [ $RC -ne 0 ]; then
-            echo "::group::xcodebuild failed (exit=$RC) — 错误行"
+          #
+          # **不要删 build/DerivedData** —— 上一步的 actions/cache 会把 DerivedData
+          # 恢复到这里, 删掉它等于把缓存作废, 每次都是 15 分钟冷构建 (实测踩过:
+          # 缓存 605MB 存下来了, 但每次构建开头就被 rm -rf 清掉, 命中率为 0)。
+          # 缓存 key 带 pbxproj / Podfile.lock / package-lock 的哈希, 依赖一变就失效。
+          #
+          # 兜底: 万一带着缓存增量构建失败 (缓存损坏等), 删掉缓存冷构建重试一次。
+          run_build() {
+            xcodebuild \
+              -workspace ios/FormulaLab.xcworkspace \
+              -scheme "${{ env.SCHEME }}" \
+              -configuration Release \
+              -sdk iphonesimulator \
+              -destination 'generic/platform=iOS Simulator' \
+              -derivedDataPath build/DerivedData \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO \
+              build > build/xcodebuild-sim.log 2>&1
+          }
+          dump_errors() {
+            echo "::group::xcodebuild 失败 — 错误行"
             grep -nE 'error:|error generated|The following build commands failed|Command .* failed|BUILD FAILED' build/xcodebuild-sim.log | tail -40 || true
             echo "::endgroup::"
             echo "::group::日志尾部"
             tail -40 build/xcodebuild-sim.log || true
             echo "::endgroup::"
+          }
+          set +e
+          run_build
+          RC=$?
+          if [ $RC -ne 0 ] && [ -d build/DerivedData ]; then
+            echo "::warning::带缓存构建失败 (exit=$RC), 清空 DerivedData 冷构建重试"
+            dump_errors
+            rm -rf build/DerivedData
+            run_build
+            RC=$?
+          fi
+          set -e
+          if [ $RC -ne 0 ]; then
+            dump_errors
             exit $RC
           fi
           echo "xcodebuild OK"
