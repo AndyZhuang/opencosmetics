@@ -290,3 +290,19 @@ iOS 的签名与打包只能在 macOS 上做，所以走 GitHub Actions：
 24. **表单控件要有 `id` 或 `name`**，否则 Chrome DevTools 报 a11y issue。
     注意 `id` 只能给 H5：RN 的 `TextInput` 不认识 `id`（传过去会告警），小程序 `Input` 也不支持。
     所以在组件里用 `process.env.TARO_ENV === 'h5'` 做平台判断。
+25. **RN 模板的 iOS bundle id 不是 `com.helloworld`**。
+    iOS 侧模板用的是 `org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)`，
+    所以 `setup-native.js` 里那句 `com.helloworld` 替换对它无效 —— iOS 的 bundle id
+    一直是模板默认值，上架会被拒，还和安卓端对不上。必须单独按
+    「App target → `com.formulalab.app`，测试 target → `com.formulalab.app.tests`」改写。
+26. **RN 模板在 npm 里叫 `ios/_xcode.env`，不是 `ios/.xcode.env`**（npm 打包会把 dotfile 改名）。
+    而 Xcode 的 “Bundle React Native code and images” 阶段把 `$(SRCROOT)/.xcode.env`
+    声明成了 inputPath，文件不在就会让 build 失败。`setup-native.js` 里要把名字改回去。
+27. **xcodebuild 的输出不要直接 tee 到 stdout**。它会把每条编译命令都打出来，
+    一次出几十 MB 的 Actions 日志，排查时根本翻不动（本机拉一次日志要十几分钟）。
+    改成写文件，失败时只回显 `error:` 行 + 尾部 40 行。
+28. **iOS 出包要关 Flipper**（`NO_FLIPPER=1`）。Flipper 是连真机调试用的，出包用不上，
+    但会把 Folly + libevent 拖进来 —— 冷构建多花 5–10 分钟，Folly 在 Xcode 15 上还常编译失败。
+29. **Xcode DerivedData 可以缓存**。RN 的 Pod 全要现编，冷构建 15+ 分钟；
+    DerivedData 里是编译产物且 runner 上绝对路径稳定，缓存后重建只要 2–3 分钟。
+    cache key 带上 `project.pbxproj` / `Podfile.lock` / `package-lock.json` 的指纹。
