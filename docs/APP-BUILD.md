@@ -196,10 +196,30 @@ iOS 的签名与打包只能在 macOS 上做，所以走 GitHub Actions：
 `simulator` 模式产出 `FormulaLab-simulator.app.zip`（Release 配置，含 JS bundle，
 不需要任何证书），下载后解压用 Xcode 模拟器打开即可。
 
-> **已验证跑绿**（2026-10-23）：run `39922315153` 全步骤 success，
-> artifact `FormulaLab-ios-simulator` 8.4 MB，DerivedData 缓存 605 MB。
-> 首次构建 ~13 分钟（Pod install 2min + 编译 11min），缓存命中后只要 2–3 分钟。
+> **已验证跑绿**（2026-10-23）：
+>
+> | run | commit | 结果 | artifact |
+> |---|---|---|---|
+> | `39922315153` | `564e0fd` | ✅ 全步骤 success | 8,505,196 B |
+> | `39927863584` | `cefebdc`（带应用图标） | ✅ 全步骤 success | 8,689,201 B |
+>
+> 产物实测：`.app` 内 `main.jsbundle` 2,838,013 B（Hermes 字节码，magic `c6 1f bc 03`）、
+> `Assets.car` 310,680 B（**加图标前这个文件根本不存在**）、`hermes.framework`、
+> `com.formulalab.app` / 显示名「配方引擎」/ 模板默认 id 已清除。
 > 整个 iOS 链路不需要本地 Mac。
+>
+> **构建耗时实测 ~14 分钟，缓存并没有帮上多少忙**（别被「DerivedData 缓存」骗了）：
+> 缓存条目 605 MB 确实命中了（`last_accessed_at` 对得上），但总时长几乎没变。
+> 真正的瓶颈是这两个，缓存 DerivedData 管不到：
+>
+> 1. **`pod install --repo-update` 每次重新拉 spec 仓库并重新解析版本**（~2 分钟）
+> 2. **「Bundle React Native code and images」脚本阶段每次都重跑 Metro + Hermes 编译**（~3–4 分钟）
+>
+> 想真正提速（下次要做）：
+> 把 `apps/taro/ios/Podfile.lock` **提交进仓库**（现在是 gitignore 的，
+> 导致每次都重新解析版本，构建不可复现）→ 就能去掉 `--repo-update`；
+> 再把 `apps/taro/ios/Pods` 和 `~/Library/Caches/CocoaPods` 也加进 `actions/cache`。
+> 预计能压到 6–8 分钟。
 
 ### 5.3 出真机 IPA
 
@@ -343,6 +363,9 @@ node scripts/make-icons.mjs --out ./preview # 只导预览图
 29. **Xcode DerivedData 可以缓存**。RN 的 Pod 全要现编，冷构建 15+ 分钟；
     DerivedData 里是编译产物且 runner 上绝对路径稳定，缓存后重建只要 2–3 分钟。
     cache key 带上 `project.pbxproj` / `Podfile.lock` / `package-lock.json` 的指纹。
+    —— **注意：这条只对「Pod 编译」这一段成立**。实测缓存确实命中了（605 MB），
+    但整体构建仍要 ~14 分钟，因为真正吃时间的是 `pod install --repo-update`
+    和每次重跑的 Metro/Hermes 脚本阶段。详见 5.2 节。
 30. **缓存目录不能在 build 步骤开头 `rm -rf`（自己把缓存作废了）**。
     恢复的 DerivedData 就落在 `apps/taro/build/DerivedData`，构建脚本第一行
     `rm -rf build/DerivedData` 会把刚恢复的缓存删掉 —— 结果是每次都是冷构建，
