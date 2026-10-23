@@ -61,7 +61,7 @@ jobs:
         run: |
           set -e
           mkdir -p build/artifact
-          ( cd dist && zip -qr "$GITHUB_WORKSPACE/${{ env.APP_DIR }}/build/artifact/formulalab-weapp.zip" . -x "h5/*" "rn/*" )
+          ( cd dist/weapp && zip -qr "$GITHUB_WORKSPACE/${{ env.APP_DIR }}/build/artifact/formulalab-weapp.zip" . )
           ( cd dist/h5 && zip -qr "$GITHUB_WORKSPACE/${{ env.APP_DIR }}/build/artifact/formulalab-h5.zip" . )
           ls -la build/artifact
 

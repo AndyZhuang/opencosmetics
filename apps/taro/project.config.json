@@ -1,20 +1,20 @@
 {
-  "miniprogramRoot": "./dist/",
+  "miniprogramRoot": "./dist/weapp/",
   "projectname": "formulalab",
   "description": "配方引擎 FormulaLab — 美妆配方工作台移动端",
   "appid": "touristappid",
   "compileType": "miniprogram",
   "libVersion": "3.0.0",
-  "srcMiniprogramRoot": "./dist/",
+  "srcMiniprogramRoot": "./dist/weapp/",
   "packOptions": {
     "ignore": [
       {
         "type": "folder",
-        "value": "h5"
+        "value": "dist/h5"
       },
       {
         "type": "folder",
-        "value": "rn"
+        "value": "dist/rn"
       }
     ]
   },

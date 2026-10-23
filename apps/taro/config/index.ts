@@ -6,6 +6,19 @@ import devConfig from './dev'
 import prodConfig from './prod'
 
 /**
+ * 三端产物输出目录 (平级, 互不覆盖)
+ *
+ * Taro 每次构建会清空 `outputRoot` **本身**, 所以三端必须是平级目录:
+ * 早先小程序用 `dist/` 而 H5 用 `dist/h5/`, 重建小程序会把整个 `dist/` 清空,
+ * H5 与 RN 产物一起消失。
+ */
+const PLATFORM_OUTPUT_ROOT: Record<string, string> = {
+  weapp: 'dist/weapp',
+  h5: 'dist/h5',
+  rn: 'dist/rn',
+};
+
+/**
  * 配方引擎 FormulaLab — Taro 4 多端配置
  *
  * 目标平台:
@@ -22,6 +35,10 @@ import prodConfig from './prod'
  *   src/styles/tokens.scss 中的 token 已按此倍率写好, 改样式时只改 token。
  */
 export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
+  // Taro CLI 在加载配置前会设好 process.env.TARO_ENV (= --type 的值),
+  // 这里用它做「不带 wrapper 直接跑 taro build」时的默认输出目录。
+  const currentPlatform = process.env.TARO_ENV || 'weapp';
+
   const baseConfig: UserConfigExport<'webpack5'> = {
     projectName: 'formulalab',
     date: '2026-10-23',
@@ -34,11 +51,16 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
     },
     sourceRoot: 'src',
     // 输出目录按平台隔离, 由 scripts/build.mjs 通过 TARO_OUTPUT_ROOT 注入:
-    //   weapp -> dist        (小程序开发者工具直接导入这个目录)
+    //   weapp -> dist/weapp  (小程序开发者工具直接导入这个目录)
     //   h5    -> dist/h5
     //   rn    -> dist/rn
-    // 三者共用 'dist' 会互相覆盖 (H5 的 index.html 会盖掉小程序的 app.json)。
-    outputRoot: process.env.TARO_OUTPUT_ROOT || 'dist',
+    // 必须是三个**平级**目录: Taro 构建时会 emptyOutputDir(outputRoot) 清空
+    // outputRoot 本身, 若 weapp 用 dist/ 而 h5 用 dist/h5/, 重建小程序会把
+    // dist/ 整个清掉, H5 与 RN 产物一起消失。
+    outputRoot:
+      process.env.TARO_OUTPUT_ROOT ||
+      PLATFORM_OUTPUT_ROOT[currentPlatform] ||
+      PLATFORM_OUTPUT_ROOT.weapp,
     plugins: [],
     defineConstants: {},
     alias: {
