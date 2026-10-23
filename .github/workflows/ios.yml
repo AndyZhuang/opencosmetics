@@ -174,8 +174,14 @@ jobs:
           cp "${{ env.APP_DIR }}/build/certs/Provision.mobileprovision" \
              ~/Library/MobileDevice/Provisioning\ Profiles/
           # 覆盖工程里的 bundle id 与 team
+          # 工程里已经写死了默认 id (com.formulalab.app / com.formulalab.app.tests),
+          # 只有当你在 Secrets 里给了 IOS_BUNDLE_ID 才需要改写。
+          # **顺序很重要**: 先改 .tests 那条, 再改主 id, 否则主 id 的替换会先命中
+          # .tests (它是主 id 的前缀)。
           find "${{ env.IOS_DIR }}" -name "project.pbxproj" -exec \
-            sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = ${{ env.BUNDLE_ID }};/g" {} \;
+            sed -i '' "s|PRODUCT_BUNDLE_IDENTIFIER = com\.formulalab\.app\.tests;|PRODUCT_BUNDLE_IDENTIFIER = ${{ env.BUNDLE_ID }}.tests;|g" {} \;
+          find "${{ env.IOS_DIR }}" -name "project.pbxproj" -exec \
+            sed -i '' "s|PRODUCT_BUNDLE_IDENTIFIER = com\.formulalab\.app;|PRODUCT_BUNDLE_IDENTIFIER = ${{ env.BUNDLE_ID }};|g" {} \;
           find "${{ env.IOS_DIR }}" -name "project.pbxproj" -exec \
             sed -i '' "s/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = ${{ secrets.IOS_TEAM_ID }};/g" {} \;
 

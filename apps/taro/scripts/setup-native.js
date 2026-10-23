@@ -293,6 +293,31 @@ if (!process.argv.includes('--only-android')) {
     return out;
   });
 
+  // -------------------------------------------------------------------------
+  // bundle id
+  // -------------------------------------------------------------------------
+  // RN 的 iOS 模板用的不是 com.helloworld, 而是
+  //   org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)
+  // 所以上面那句 com.helloworld 替换对它无效 —— bundle id 一直是模板默认值,
+  // 提交到 App Store 会被拒, 而且和安卓端对不上。
+  // 这里单独处理: App target 用 IOS_BUNDLE_ID, 测试 target 追加 .tests
+  // (测试 bundle 不能和 App 抢同一个 id)。
+  const pbxprojPath = path.join(iosDst, `${APP_NAME}.xcodeproj`, 'project.pbxproj');
+  if (fs.existsSync(pbxprojPath)) {
+    const TEMPLATE_BID = /PRODUCT_BUNDLE_IDENTIFIER = "org\.reactjs\.native\.example\.\$\(PRODUCT_NAME:rfc1034identifier\)";/;
+    let pbx = fs.readFileSync(pbxprojPath, 'utf8');
+    // 测试 target 的 PRODUCT_NAME 是 $(TARGET_NAME), 靠这一行区分
+    pbx = pbx.replace(
+      new RegExp(
+        TEMPLATE_BID.source + '(\\s*\\n\\s*PRODUCT_NAME = "\\$\\(TARGET_NAME\\)";)'
+      ),
+      `PRODUCT_BUNDLE_IDENTIFIER = "${IOS_BUNDLE_ID}.tests";$1`
+    );
+    pbx = pbx.replace(new RegExp(TEMPLATE_BID.source, 'g'), `PRODUCT_BUNDLE_IDENTIFIER = "${IOS_BUNDLE_ID}";`);
+    fs.writeFileSync(pbxprojPath, pbx);
+    console.log(`[setup-native] ios bundle id -> ${IOS_BUNDLE_ID} (.tests for test target)`);
+  }
+
   console.log(`[setup-native] ios     -> ${path.relative(projectRoot, iosDst)}`);
 }
 
