@@ -50,7 +50,7 @@ jobs:
 
       - name: Encoding check
         working-directory: ${{ env.APP_DIR }}
-        run: node ../scripts/check_taro_encodings.mjs src
+        run: node ../../scripts/check_taro_encodings.mjs src
 
       - name: Build weapp + h5
         working-directory: ${{ env.APP_DIR }}
