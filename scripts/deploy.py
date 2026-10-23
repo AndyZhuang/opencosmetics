@@ -36,15 +36,30 @@ from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-LOCAL_REPO = Path("D:/minimax/serverM/opencosmetics")
-TARBALL = Path("D:/minimax/serverM/opencosmetics_deploy.tar.gz")
+LOCAL_REPO_DEFAULT = Path("D:/minimax/serverM/opencosmetics")
+LOCAL_REPO = Path(
+    os.environ.get("DEPLOY_LOCAL_REPO")
+    or (LOCAL_REPO_DEFAULT if LOCAL_REPO_DEFAULT.exists() else Path.cwd())
+)
+TARBALL = Path(
+    os.environ.get(
+        "DEPLOY_TARBALL",
+        str(LOCAL_REPO.parent / "opencosmetics_deploy.tar.gz")
+        if LOCAL_REPO == LOCAL_REPO_DEFAULT
+        else str(LOCAL_REPO / "opencosmetics_deploy.tar.gz"),
+    )
+)
 REMOTE_SCRIPT_LOCAL = LOCAL_REPO / "deploy_remote.sh"
-SERVER = "root@149.28.145.15"
+SERVER = os.environ.get("DEPLOY_SERVER", "root@149.28.145.15")
 REMOTE_TMP = "/tmp/opencosmetics_upload.tar.gz"
 REMOTE_SCRIPT = "/tmp/deploy_remote.sh"
 REMOTE_DIR = "/var/www/opencosmetics"
 REMOTE_DIR_OLD = "/var/www/opencosmetics_v1"
-PUBLIC = "https://opencosmetics.top"
+PUBLIC = os.environ.get("DEPLOY_PUBLIC", "https://opencosmetics.top")
+
+# CI 用: 私钥与 known_hosts 由仓库 Secrets 注入
+SSH_IDENTITY = os.environ.get("DEPLOY_SSH_KEY")
+SSH_KNOWN_HOSTS = os.environ.get("DEPLOY_KNOWN_HOSTS")
 
 EXCLUDE_DIRS = ("node_modules", ".next", ".git", "dist", ".taro", ".rnbundle", "apps", "build")
 EXCLUDE_NAMES = ("deploy_remote.sh",)
@@ -56,8 +71,18 @@ EXCLUDE_PATTERNS = (
 EXCLUDE_SUFFIXES = (".err", ".log")
 
 
+def _ssh_opts():
+    """SSH/scp 公共参数: CI 场景下用注入的私钥 + 固定的 known_hosts。"""
+    opts = ["-o ConnectTimeout=15", "-o StrictHostKeyChecking=no"]
+    if SSH_IDENTITY:
+        opts += ["-i", SSH_IDENTITY]
+    if SSH_KNOWN_HOSTS:
+        opts += ["-o", f"UserKnownHostsFile={SSH_KNOWN_HOSTS}", "-o", "StrictHostKeyChecking=yes"]
+    return " ".join(opts)
+
+
 def ssh(cmd, timeout=900):
-    full = f'ssh -o ConnectTimeout=15 -o StrictHostKeyChecking=no {SERVER} "{cmd}"'
+    full = f'ssh {_ssh_opts()} {SERVER} "{cmd}"'
     r = subprocess.run(full, shell=True, capture_output=True, text=True,
                        encoding="utf-8", errors="replace", timeout=timeout)
     if r.returncode != 0:
@@ -66,7 +91,7 @@ def ssh(cmd, timeout=900):
 
 
 def scp_upload(local, remote):
-    cmd = f'scp -o ConnectTimeout=20 -o StrictHostKeyChecking=no "{local}" {SERVER}:"{remote}"'
+    cmd = f'scp {_ssh_opts()} "{local}" {SERVER}:"{remote}"'
     r = subprocess.run(cmd, shell=True, capture_output=True, text=True,
                        encoding="utf-8", errors="replace", timeout=600)
     if r.returncode != 0:

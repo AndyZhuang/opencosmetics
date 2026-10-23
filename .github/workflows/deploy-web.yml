@@ -1,0 +1,77 @@
+name: Deploy Web (FormulaLab)
+
+# 配方引擎 FormulaLab — 生产部署 (opencosmetics.top)
+#
+# 为什么要走 CI 而不是本机:
+#   这台 VPS 的 fail2ban 对 sshd 极度激进 (历史上 30+ 次封禁, 10 分钟解封),
+#   本机出口 IP 被封时完全没法连。GitHub runner 的出口 IP 是另一批, 不受影响,
+#   所以把部署放到 CI 里最稳。
+#
+# 部署流程 (与 scripts/deploy.py 完全一致, 只开 3 个 SSH 连接):
+#   1) scp  代码包
+#   2) scp  远端脚本
+#   3) ssh  执行 deploy_remote.sh (远端内部 stop/backup/extract/build/start/smoke)
+#   4) 本地用公网 HTTPS 校验 20+ 端点
+#
+# 需要的仓库 Secrets:
+#   DEPLOY_SSH_KEY       部署用的 SSH 私钥 (已注册到服务器 root 账号)
+#   DEPLOY_KNOWN_HOSTS   服务器的 known_hosts 条目 (固定主机指纹, 防中间人)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, main]
+    paths:
+      - "app/**"
+      - "lib/**"
+      - "components/**"
+      - "data/**"
+      - "public/**"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.js"
+      - "deploy_remote.sh"
+      - "scripts/deploy.py"
+      - ".github/workflows/deploy-web.yml"
+
+concurrency:
+  group: deploy-web-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup SSH key
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: python scripts/deploy.py
+
+      - name: Summary
+        if: always()
+        run: echo "部署日志见上面 [remote] 段; 校验段列出了所有异常端点。"
