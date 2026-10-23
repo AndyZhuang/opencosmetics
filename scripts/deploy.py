@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deploy open-cosmetics (配方引擎 FormulaLab) to production (149.28.145.15).
+"""Deploy open-cosmetics (配方引擎 FormulaLab) to production (207.148.66.81).
 
 Usage:
     python scripts/deploy.py          # full deploy
@@ -7,9 +7,10 @@ Usage:
     python scripts/deploy.py rollback # restore previous release (1 ssh)
 
 [连接次数纪律 —— 重要]
-    这台 VPS 的 fail2ban 对 sshd 极度激进 (历史 30+ 次封禁, 10 分钟解封)。
-    SSH 认证失败会直接触发 10 分钟 IP 封禁, 表现为连接 **超时** (DROP 而非 REJECT)。
-    因此整个部署 **只允许 3 次 SSH 连接**:
+    生产机是 207.148.66.81 (域名 opencosmetics.top 的 A 记录指向它)。
+    注意: 早期脚本里写的 149.28.145.15 是**旧 IP**, 现在那条 IP 的 22 端口
+    从公网不通 (表现为连接超时), 曾被误判成 fail2ban 封禁。
+    这台 VPS 的 fail2ban 对 sshd 也确实激进, 所以整个部署 **只允许 3 次 SSH 连接**:
         1) scp  代码包
         2) scp  远端脚本
         3) ssh  执行远端脚本 (远端内部做 stop/backup/extract/build/start/smoke)
@@ -50,7 +51,7 @@ TARBALL = Path(
     )
 )
 REMOTE_SCRIPT_LOCAL = LOCAL_REPO / "deploy_remote.sh"
-SERVER = os.environ.get("DEPLOY_SERVER", "root@149.28.145.15")
+SERVER = os.environ.get("DEPLOY_SERVER", "root@207.148.66.81")
 REMOTE_TMP = "/tmp/opencosmetics_upload.tar.gz"
 REMOTE_SCRIPT = "/tmp/deploy_remote.sh"
 REMOTE_DIR = "/var/www/opencosmetics"
@@ -230,7 +231,7 @@ def main():
             return rollback()
 
     print("=" * 62)
-    print("DEPLOY 配方引擎 FormulaLab -> 149.28.145.15 (opencosmetics.top)")
+    print("DEPLOY 配方引擎 FormulaLab -> 207.148.66.81 (opencosmetics.top)")
     print("=" * 62)
     build_tarball()
     upload()

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# 配方引擎 FormulaLab — 生产部署远端脚本 (在 149.28.145.15 上执行)
+# 配方引擎 FormulaLab — 生产部署远端脚本 (在 207.148.66.81 上执行)
 #
 # 关键设计: 整个部署过程 **只开 1 个 SSH 连接**。
 # 这台 VPS 的 fail2ban 对 sshd 极度激进 (历史上 30+ 次封禁, 10 分钟解封),
@@ -47,12 +47,25 @@ else
 fi
 
 log "5/8 reuse node_modules (package.json unchanged)"
-if [ -d "$REMOTE_DIR_OLD/node_modules" ]; then
+OLD_LOCK_HASH=""
+if [ -f "$REMOTE_DIR_OLD/package-lock.json" ]; then
+  OLD_LOCK_HASH=$(md5sum "$REMOTE_DIR_OLD/package-lock.json" | cut -d' ' -f1)
+fi
+NEW_LOCK_HASH=""
+if [ -f "$REMOTE_DIR/package-lock.json" ]; then
+  NEW_LOCK_HASH=$(md5sum "$REMOTE_DIR/package-lock.json" | cut -d' ' -f1)
+fi
+if [ -n "$OLD_LOCK_HASH" ] && [ "$OLD_LOCK_HASH" = "$NEW_LOCK_HASH" ] && [ -d "$REMOTE_DIR_OLD/node_modules" ]; then
   cp -a "$REMOTE_DIR_OLD/node_modules" "$REMOTE_DIR/node_modules"
-  log "    reused node_modules"
+  log "    reused node_modules (lock file unchanged)"
 else
-  log "    running npm install"
-  cd "$REMOTE_DIR" && npm install --omit=dev --no-audit --no-fund 2>&1 | tail -3
+  log "    lock file changed -> npm install"
+  cd "$REMOTE_DIR" && npm install --omit=dev --no-audit --no-fund 2>&1 | tail -5
+  # 服务器到 npm 源可能不通, 装不上就退回旧 node_modules (至少能起来)
+  if [ ! -d "$REMOTE_DIR/node_modules/next" ] && [ -d "$REMOTE_DIR_OLD/node_modules" ]; then
+    log "    npm install failed, falling back to previous node_modules"
+    cp -a "$REMOTE_DIR_OLD/node_modules" "$REMOTE_DIR/node_modules"
+  fi
 fi
 
 log "6/8 build Next.js"

@@ -11,6 +11,10 @@
       {
         "type": "folder",
         "value": "h5"
+      },
+      {
+        "type": "folder",
+        "value": "rn"
       }
     ]
   },
