@@ -32,6 +32,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_DIR: apps/taro
+      # 注意: secrets 上下文不能直接用在 if: 表达式里 (GitHub 会报
+      # "Unrecognized named-value: 'secrets'"), 必须先挂到 env 再判断。
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -74,11 +79,11 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Restore signing key
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
         env:
-          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEYSTORE: ${{ env.ANDROID_KEYSTORE_BASE64 }}
+          ALIAS: ${{ env.ANDROID_KEY_ALIAS }}
+          PASSWORD: ${{ env.ANDROID_KEY_PASSWORD }}
         run: |
           set -e
           echo "$KEYSTORE" | base64 --decode > "${{ env.APP_DIR }}/android/app/fl-release.keystore"
