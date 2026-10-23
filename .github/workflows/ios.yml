@@ -76,6 +76,19 @@ jobs:
           pod install --repo-update 2>&1 | tee pod-install.log
 
       # ---------------------------------------------------------------------
+      # Xcode DerivedData 缓存
+      # ---------------------------------------------------------------------
+      # React Native 的 Pod 全部要现编, 冷构建要 15+ 分钟。
+      # DerivedData 里是编译产物, 且 runner 上的绝对路径 (/Users/runner/work/...)
+      # 是稳定的, 所以可以缓存, 命中后重建只要 2-3 分钟。
+      # key 里带上 pbxproj / Podfile.lock / package-lock 的指纹, 依赖一变就失效。
+      - name: Cache Xcode DerivedData
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.APP_DIR }}/build/DerivedData
+          key: ios-deriveddata-${{ runner.os }}-${{ hashFiles('apps/taro/ios/FormulaLab.xcodeproj/project.pbxproj', 'apps/taro/ios/Podfile.lock', 'apps/taro/package-lock.json') }}
+
+      # ---------------------------------------------------------------------
       # 模拟器包: Release 配置 (会打 JS bundle), 关闭签名
       # ---------------------------------------------------------------------
       - name: Build simulator app

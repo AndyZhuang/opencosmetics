@@ -233,6 +233,27 @@ if (!process.argv.includes('--only-android')) {
   };
   renameInDir(iosDst);
 
+  // -------------------------------------------------------------------------
+  // `_xcode.env` -> `.xcode.env`
+  // -------------------------------------------------------------------------
+  // React Native 官方模板在仓库里叫 `ios/.xcode.env`, 但发到 npm 时 dotfile 会被
+  // 打包规则改名成 `ios/_xcode.env` (react-native init 时会再改回来)。
+  // 我们直接抄 npm 包, 所以拿到的是 `_xcode.env`。
+  //
+  // **这不是小事**: Xcode 工程的 "Bundle React Native code and images" 阶段把
+  //   $(SRCROOT)/.xcode.env 与 $(SRCROOT)/.xcode.env.local
+  // 声明成了 inputPaths。Xcode 找不到 inputPath 的文件会直接报
+  //   error: Build input file cannot be found: '.../ios/.xcode.env'
+  // 并让整个 build 失败 (不是 warning)。
+  // 所以这里必须把名字改回去。
+  const xcodeEnvTpl = path.join(iosDst, '_xcode.env');
+  const xcodeEnvReal = path.join(iosDst, '.xcode.env');
+  if (fs.existsSync(xcodeEnvTpl)) {
+    fs.copyFileSync(xcodeEnvTpl, xcodeEnvReal);
+    fs.unlinkSync(xcodeEnvTpl);
+    console.log('[setup-native] ios/_xcode.env -> ios/.xcode.env');
+  }
+
   // 顶层目录本身也要改名 (ios/HelloWorld -> ios/FormulaLab)
   for (const entry of fs.readdirSync(iosDst)) {
     if (!entry.includes('HelloWorld')) continue;
