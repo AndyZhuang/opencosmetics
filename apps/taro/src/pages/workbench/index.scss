@@ -1,0 +1,191 @@
+@use "../../styles/tokens.scss" as *;
+
+// ---- 搜索 ----------------------------------------------------------------
+.wb-search-wrap {
+  position: relative;
+  margin-bottom: $sp-lg;
+}
+
+.wb-suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 84px;
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $radius;
+  overflow: hidden;
+  z-index: 20;
+}
+
+.wb-suggest-loading {
+  padding: $sp-lg;
+}
+
+.wb-suggest-hint {
+  font-size: $fs-small;
+  color: $muted;
+}
+
+.wb-suggest-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: 1px solid $line-2;
+}
+
+.wb-suggest-item:last-child { border-bottom: none; }
+
+.wb-suggest-main {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex: 1;
+  min-width: 0;
+}
+
+.wb-suggest-name {
+  font-size: $fs-body;
+  color: $ink;
+  font-weight: 500;
+}
+
+.wb-suggest-cn {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+.wb-suggest-meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: $sp-sm;
+}
+
+// ---- 快速入口 ------------------------------------------------------------
+.wb-quick {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: $sp-xl;
+}
+
+.wb-quick-item {
+  flex: 1;
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $radius;
+  padding: $sp-md;
+  margin-right: $sp-sm;
+  position: relative;
+  min-height: 150px;
+}
+
+.wb-quick-item:last-child { margin-right: 0; }
+
+.wb-quick-label {
+  display: block;
+  font-size: $fs-body;
+  color: $ink;
+  font-weight: 600;
+}
+
+.wb-quick-sub {
+  display: block;
+  font-size: $fs-micro;
+  color: $muted;
+  margin-top: $sp-xs;
+  line-height: 1.5 * $fs-micro;
+}
+
+.wb-quick-arrow {
+  position: absolute;
+  right: $sp-md;
+  bottom: $sp-sm;
+  font-size: $fs-sub;
+  color: $accent;
+}
+
+// ---- 草稿 ----------------------------------------------------------------
+.wb-draft-time {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+.wb-row-arrow {
+  font-size: $fs-sub;
+  color: $muted;
+}
+
+// ---- 工具九宫格 ----------------------------------------------------------
+.wb-tools {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: $sp-xl;
+}
+
+.wb-tool {
+  width: 31.5%;
+  margin-right: 2.75%;
+  margin-bottom: $sp-sm;
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $radius-sm;
+  padding: $sp-md $sp-sm;
+}
+
+.wb-tool:nth-child(3n) { margin-right: 0; }
+
+.wb-tool-label {
+  display: block;
+  font-size: $fs-small;
+  color: $ink;
+  font-weight: 500;
+}
+
+.wb-tool-hint {
+  display: block;
+  font-size: $fs-micro;
+  color: $muted;
+  margin-top: 2px;
+}
+
+// ---- 可信度 --------------------------------------------------------------
+.wb-trust-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: $sp-xs 0;
+  border-bottom: 1px solid $line-2;
+}
+
+.wb-trust-label {
+  font-size: $fs-small;
+  color: $ink-2;
+}
+
+.wb-trust-value {
+  font-size: $fs-small;
+  color: $ink;
+  margin-left: $sp-md;
+  text-align: right;
+}
+
+.wb-trust-note {
+  margin-top: $sp-md;
+  padding: $sp-sm;
+  background: $surface-2;
+  border-radius: $radius-sm;
+}
+
+.wb-trust-note-text {
+  font-size: $fs-micro;
+  color: $muted;
+  line-height: 1.6 * $fs-micro;
+}

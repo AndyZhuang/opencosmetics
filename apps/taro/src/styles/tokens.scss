@@ -1,0 +1,68 @@
+// ============================================================================
+// 配方引擎 FormulaLab — 设计 token (唯一真源)
+// ----------------------------------------------------------------------------
+// 为什么用 SCSS 变量而不是 CSS 自定义属性:
+//   React Native 的样式系统不支持 var(--x), 三端同码必须保证编译产物是字面量。
+//   因此 token 用 SCSS 变量承载, 编译后 weapp / h5 / rn 得到完全相同的色值与尺寸。
+//
+// 尺寸倍率:
+//   Taro designWidth = 750, 三端 pxtransform 换算一致
+//     weapp: 14px -> 14rpx   (375pt 屏 = 7pt)
+//     h5   : 14px -> 0.35rem (375pt 屏 = 7px)
+//     rn   : 14px -> 7px     (375pt 屏 = 7px)
+//   => 源码 1px = 375pt 宽屏上的 0.5 物理 px。
+//   下面每个尺寸 token 的注释里都写了「设计规范物理值」, 已乘 2。
+// ============================================================================
+
+// ---- 色板 ---------------------------------------------------------------
+$paper:       #FAFAF8;   // 画布: 实验记录纸
+$surface:     #FFFFFF;
+$surface-2:   #F3F2ED;
+$ink:         #16181D;   // 主文字
+$ink-2:       #4A5160;   // 次级
+$muted:       #8A91A0;   // 辅助
+$line:        #E4E3DE;
+$line-2:      #EFEEE9;
+$accent:      #0E7C86;   // 试剂青 — 主强调
+$accent-2:    #17A2B8;
+$accent-soft: #E3F1F2;
+$warn:        #B26A00;
+$warn-soft:   #FDF2E0;
+$block:       #C0392B;
+$block-soft:  #FCEBE9;
+$ok:          #2E7D4F;
+$ok-soft:     #E8F4EC;
+
+// ---- 圆角 / 阴影 --------------------------------------------------------
+$radius:      28px;      // 14px
+$radius-sm:   18px;      // 9px
+$shadow:      0 2px 4px rgba(22, 24, 29, .05), 0 16px 48px rgba(22, 24, 29, .06);
+$shadow-flat: 0 2px 4px rgba(22, 24, 29, .05);
+
+// ---- 字体 ---------------------------------------------------------------
+// $font-sans 只在 weapp / h5 用 (元素选择器), RN 不接受 CSS 字体栈。
+$font-sans: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", Inter, sans-serif;
+// $font-mono 必须是**单个**字体名: RN 的 fontFamily 不接受字体栈,
+// 通用族名 monospace 在 iOS/Android/小程序/浏览器上都会落到各自的等宽字体。
+$font-mono: monospace;
+
+// ---- 字号 (源码 px = 物理 pt × 2) ---------------------------------------
+$fs-display: 56px;   // 28pt 大数字
+$fs-title:   36px;   // 18pt 标题
+$fs-sub:     32px;   // 16pt 小标题
+$fs-body:    28px;   // 14pt 正文
+$fs-small:   26px;   // 13pt 辅助
+$fs-micro:   22px;   // 11pt 标签
+
+// ---- 间距 ---------------------------------------------------------------
+$sp-xs:  8px;    // 4pt
+$sp-sm:  16px;   // 8pt
+$sp-md:  24px;   // 12pt
+$sp-lg:  32px;   // 16pt
+$sp-xl:  48px;   // 24pt
+$sp-2xl: 64px;   // 32pt
+
+// ---- 布局 ---------------------------------------------------------------
+$tabbar-h:  104px;  // 52pt 自绘底部导航高度
+$topbar-h:  88px;   // 44pt 自绘顶栏高度
+$page-pad:  28px;   // 14pt 页面左右留白

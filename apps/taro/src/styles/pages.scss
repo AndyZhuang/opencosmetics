@@ -1,0 +1,455 @@
+// @forward 把 token 原样透传给所有 @use 本文件的页面 —— 否则页面拿不到 $surface 等变量
+// (Sass module 的 @use 不会自动再导出被 use 模块的成员)。
+@forward "./tokens.scss";
+@use "./tokens.scss" as *;
+
+// ============================================================================
+// 页面公共样式 —— 被各页面的 index.scss @use 引入
+// 注意: SCSS 的 @use 会把本文件的规则注入调用方, 变量需要 as * 才能直接用。
+// ============================================================================
+
+// ---- 搜索 / 筛选 ---------------------------------------------------------
+.bn-search-wrap {
+  margin-bottom: $sp-md;
+}
+
+.bn-filter-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: $sp-sm;
+}
+
+.bn-filter-row > view:first-child {
+  flex: 1;
+}
+
+.bn-count {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+// ---- 通用块 --------------------------------------------------------------
+.bn-block {
+  margin-top: $sp-md;
+}
+
+.bn-label {
+  display: block;
+  font-size: $fs-micro;
+  color: $muted;
+  margin-bottom: $sp-sm;
+  letter-spacing: .04em;
+}
+
+.bn-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: $sp-md 0;
+}
+
+.bn-actions > view {
+  margin-right: $sp-sm;
+  margin-bottom: $sp-sm;
+}
+
+.bn-actions-sticky {
+  margin-top: $sp-xl;
+}
+
+.bn-tabs {
+  margin: $sp-lg 0 $sp-md;
+}
+
+.bn-grid-2 {
+  display: flex;
+  flex-direction: row;
+  margin-top: $sp-md;
+}
+
+.bn-grid-2 > view:first-child {
+  flex: 1;
+  margin-right: $sp-sm;
+}
+
+.bn-grid-2 > view:last-child {
+  flex: 1;
+}
+
+// ---- 输入 ----------------------------------------------------------------
+.bn-input {
+  flex: 1;
+  height: 64px;
+  padding: 0 $sp-md;
+  border: 1px solid $line;
+  border-radius: $radius-sm;
+  background: $paper;
+  color: $ink;
+  font-size: $fs-small;
+}
+
+.bn-input-pct {
+  flex: none;
+  width: 140px;
+  margin-left: $sp-sm;
+  text-align: right;
+}
+
+.bn-placeholder {
+  color: $muted;
+}
+
+.bn-textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: $sp-md;
+  border: 1px solid $line;
+  border-radius: $radius-sm;
+  background: $paper;
+  color: $ink;
+  font-size: $fs-small;
+  line-height: 1.6 * $fs-small;
+}
+
+// ---- 标签 ----------------------------------------------------------------
+.bn-d-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: $sp-sm;
+}
+
+.bn-flags {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+// ---- 结论 / 风险 ---------------------------------------------------------
+.bn-risk-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $sp-md;
+}
+
+.bn-risk-count {
+  font-size: $fs-micro;
+  color: $muted;
+}
+
+.bn-rule {
+  padding: $sp-md 0;
+  border-bottom: 1px solid $line-2;
+}
+
+.bn-rule:last-child {
+  border-bottom: none;
+}
+
+.bn-rule-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: $sp-xs;
+}
+
+.bn-rule-id {
+  font-size: $fs-micro;
+  color: $ink;
+  margin-left: $sp-sm;
+  font-weight: 600;
+}
+
+.bn-rule-cat {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+.bn-rule-text {
+  display: block;
+  font-size: $fs-small;
+  color: $ink-2;
+  line-height: 1.6 * $fs-small;
+}
+
+.bn-rule-matched {
+  display: block;
+  font-size: $fs-micro;
+  color: $muted;
+  margin-top: $sp-xs;
+}
+
+.bn-note {
+  padding: $sp-sm 0;
+}
+
+.bn-note-text {
+  display: block;
+  font-size: $fs-small;
+  color: $ink-2;
+  line-height: 1.6 * $fs-small;
+}
+
+// ---- 统计 / 角色 ---------------------------------------------------------
+.bn-stat-row {
+  display: flex;
+  flex-direction: row;
+  border-top: 1px solid $line-2;
+}
+
+.bn-stat-row > view {
+  flex: 1;
+  padding-top: $sp-md;
+  border-right: 1px solid $line-2;
+}
+
+.bn-stat-row > view:last-child {
+  border-right: none;
+}
+
+.bn-role-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: $sp-sm 0;
+  border-bottom: 1px solid $line-2;
+}
+
+.bn-role-row:last-child {
+  border-bottom: none;
+}
+
+.bn-role-name {
+  flex: 1;
+  font-size: $fs-small;
+  color: $ink;
+}
+
+.bn-role-count {
+  width: 60px;
+  text-align: right;
+  font-size: $fs-small;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+.bn-alert {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: $sp-sm 0;
+  border-bottom: 1px solid $line-2;
+}
+
+.bn-alert:last-child {
+  border-bottom: none;
+}
+
+.bn-alert-name {
+  font-size: $fs-small;
+  color: $ink;
+  margin-left: $sp-sm;
+}
+
+.bn-alert-cn {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+// ---- 详情 ----------------------------------------------------------------
+.bn-d-name {
+  display: block;
+  font-size: $fs-sub;
+  color: $ink;
+  font-weight: 600;
+}
+
+.bn-d-cn {
+  display: block;
+  font-size: $fs-small;
+  color: $muted;
+  margin-top: $sp-xs;
+}
+
+.bn-d-region {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-sm 0;
+  border-bottom: 1px solid $line-2;
+}
+
+.bn-d-region:last-child {
+  border-bottom: none;
+}
+
+.bn-d-region-name {
+  font-size: $fs-small;
+  color: $ink;
+}
+
+// ---- 草稿列表 ------------------------------------------------------------
+.bn-f-item {
+  border-bottom: 1px solid $line-2;
+  padding-bottom: $sp-sm;
+  margin-bottom: $sp-sm;
+}
+
+.bn-f-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.bn-f-actions {
+  display: flex;
+  flex-direction: row;
+  margin-top: $sp-xs;
+}
+
+.bn-draft-time {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+.bn-chip-btn {
+  display: flex;
+  align-items: center;
+  padding: $sp-xs $sp-md;
+  border: 1px solid $line;
+  border-radius: $radius-sm;
+  margin-right: $sp-sm;
+  margin-top: $sp-xs;
+  background: $surface;
+}
+
+.bn-chip-btn-text {
+  font-size: $fs-micro;
+  color: $ink-2;
+}
+
+.bn-chip-btn-on {
+  background: $accent-soft;
+  border-color: $accent;
+}
+
+.bn-chip-btn-on .bn-chip-btn-text {
+  color: $accent;
+}
+
+.bn-chip-btn-danger .bn-chip-btn-text {
+  color: $block;
+}
+
+.bn-inline-btn {
+  padding: $sp-sm $sp-lg;
+  border: 1px solid $line;
+  border-radius: $radius-sm;
+  background: $surface;
+}
+
+.bn-inline-btn-text {
+  font-size: $fs-small;
+  color: $accent;
+  font-weight: 600;
+}
+
+// ---- 对比 ----------------------------------------------------------------
+.bn-cmp-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: $sp-sm 0;
+  border-bottom: 1px solid $line-2;
+}
+
+.bn-cmp-row:last-child {
+  border-bottom: none;
+}
+
+.bn-cmp-idx {
+  font-size: $fs-micro;
+  color: $muted;
+  width: 44px;
+}
+
+.bn-cmp-name {
+  flex: 1;
+  font-size: $fs-small;
+  color: $ink;
+}
+
+.bn-cmp-num {
+  font-size: $fs-micro;
+  color: $ink-2;
+  margin-right: $sp-sm;
+}
+
+.bn-cmp-cell {
+  flex: 1;
+  padding-top: $sp-md;
+  padding-right: $sp-md;
+}
+
+.bn-cmp-val {
+  display: block;
+  font-size: $fs-sub;
+  color: $ink;
+  font-weight: 600;
+}
+
+// ---- 替代 ----------------------------------------------------------------
+.bn-sub-card {
+  margin-bottom: $sp-sm;
+}
+
+.bn-sub-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $sp-xs;
+}
+
+.bn-sub-name {
+  font-size: $fs-body;
+  color: $ink;
+  font-weight: 600;
+}
+
+// ---- 页脚说明 ------------------------------------------------------------
+.bn-foot-note {
+  margin: $sp-lg 0 $sp-md;
+}
+
+.bn-foot-text {
+  font-size: $fs-micro;
+  color: $muted;
+  line-height: 1.6 * $fs-micro;
+}
+
+// ---- toast ---------------------------------------------------------------
+.bn-toast {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: $tabbar-h + $sp-lg;
+  display: flex;
+  justify-content: center;
+}
+
+.bn-toast-text {
+  background: $ink;
+  color: #fff;
+  font-size: $fs-small;
+  padding: $sp-sm $sp-lg;
+  border-radius: $radius-sm;
+}

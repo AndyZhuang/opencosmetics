@@ -1,0 +1,27 @@
+@use "./styles/tokens.scss" as *;
+
+/**
+ * RN 平台专用的全局样式
+ * ---------------------------------------------------------------------------
+ * 为什么要有这个文件:
+ *   1. RN 没有 page / body 元素。RN 的 CSS→StyleSheet 转换器会把 `body`
+ *      映射成 'div' 这种不存在的组件类型, stylelint 校验直接抛
+ *      "Unexpected token type: div", 整个 RN bundle 构建不出来。
+ *      所以 RN 下必须把元素选择器换成类选择器。
+ *   2. RN 的 fontFamily 只接受**单个**字体名, 不接受 CSS 字体栈
+ *      (小程序和浏览器都接受)。因此 $font-sans 的字体栈只能留给 weapp / h5。
+ *   3. RN 不支持 font-variant-numeric (等宽数字), 也不支持 box-sizing
+ *      (Yoga 默认就是 border-box)。
+ *
+ *   页面底色由 PageShell 的 .shell (min-height:100vh; background:$paper) 负责,
+ *   这里不再给根节点刷背景。
+ */
+
+.mono {
+  font-family: $font-mono;
+  letter-spacing: .01em;
+}
+
+.num {
+  font-family: $font-mono;
+}

@@ -1,0 +1,524 @@
+@use "../styles/tokens.scss" as *;
+
+// ============================================================================
+// UI Kit 样式
+// 规则: 细边框 + 留白 + 精确数字。不使用 gap / box-shadow / sticky (RN 不支持)。
+// ============================================================================
+
+.mono {
+  font-family: $font-mono;
+  // 注: font-variant-numeric 在 RN 里没有对应实现, 且部分平台会告警, 这里统一去掉。
+  letter-spacing: .01em;
+}
+
+// ---- 卡片 ---------------------------------------------------------------
+.card {
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $radius;
+  padding: $sp-lg;
+  margin-bottom: $sp-md;
+}
+
+.section-title {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: $sp-sm;
+}
+
+.section-title-main {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.section-title-text {
+  font-size: $fs-sub;
+  font-weight: 600;
+  color: $ink;
+  letter-spacing: .01em;
+}
+
+.section-title-hint {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+.section-title-extra {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+// ---- 徽章 ---------------------------------------------------------------
+.badge {
+  display: inline-block;
+  font-size: $fs-micro;
+  line-height: 1.5 * $fs-micro;
+  padding: 2px $sp-sm;
+  border-radius: $radius-sm;
+  border: 1px solid $line;
+  color: $ink-2;
+  background: $surface-2;
+  margin-right: $sp-xs;
+}
+
+.badge-accent { color: $accent; background: $accent-soft; border-color: $accent-soft; }
+.badge-ok     { color: $ok;     background: $ok-soft;     border-color: $ok-soft; }
+.badge-warn   { color: $warn;   background: $warn-soft;   border-color: $warn-soft; }
+.badge-block  { color: $block;  background: $block-soft;  border-color: $block-soft; }
+.badge-ink    { color: $ink;    background: $surface;     border-color: $line; }
+.badge-neutral{ color: $muted;  background: $surface-2;   border-color: $line; }
+
+.badge-solid.badge-ok    { color: #FFFFFF; background: $ok;     border-color: $ok; }
+.badge-solid.badge-warn  { color: #FFFFFF; background: $warn;   border-color: $warn; }
+.badge-solid.badge-block { color: #FFFFFF; background: $block;  border-color: $block; }
+.badge-solid.badge-accent{ color: #FFFFFF; background: $accent; border-color: $accent; }
+
+// ---- 指标 ---------------------------------------------------------------
+.stat {
+  display: flex;
+  flex-direction: column;
+  padding: $sp-sm 0;
+}
+
+.stat-label {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-bottom: 2px;
+}
+
+.stat-value-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.stat-value {
+  font-size: $fs-title;
+  font-weight: 600;
+  color: $ink;
+  line-height: 1.25 * $fs-title;
+}
+
+.stat-unit {
+  font-size: $fs-small;
+  color: $muted;
+  margin-left: $sp-xs;
+}
+
+.stat-sub {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-top: 2px;
+}
+
+.tone-accent { color: $accent; }
+.tone-ok     { color: $ok; }
+.tone-warn   { color: $warn; }
+.tone-block  { color: $block; }
+.tone-ink    { color: $ink; }
+.tone-neutral{ color: $muted; }
+
+.tone-bg-accent { background: $accent; }
+.tone-bg-ok     { background: $ok; }
+.tone-bg-warn   { background: $warn; }
+.tone-bg-block  { background: $block; }
+.tone-bg-neutral{ background: $muted; }
+.tone-bg-ink    { background: $ink; }
+
+// ---- 键值行 -------------------------------------------------------------
+.kv {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: $sp-xs 0;
+  border-bottom: 1px solid $line-2;
+}
+
+.kv:last-child { border-bottom: none; }
+
+.kv-label {
+  font-size: $fs-small;
+  color: $ink-2;
+  flex-shrink: 0;
+}
+
+.kv-value {
+  font-size: $fs-small;
+  color: $ink;
+  text-align: right;
+  margin-left: $sp-md;
+}
+
+// ---- 数据行 -------------------------------------------------------------
+.data-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: $sp-md 0;
+  border-bottom: 1px solid $line-2;
+}
+
+.data-row:last-child { border-bottom: none; }
+
+.data-idx {
+  font-size: $fs-micro;
+  color: $muted;
+  width: 48px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.data-main { flex: 1; min-width: 0; }
+
+.data-name-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.data-name {
+  font-size: $fs-body;
+  color: $ink;
+  font-weight: 500;
+}
+
+.data-cn {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+.data-meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.data-right {
+  flex-shrink: 0;
+  margin-left: $sp-sm;
+  text-align: right;
+}
+
+.data-row-block { border-left: 3px solid $block; padding-left: $sp-sm; }
+.data-row-warn  { border-left: 3px solid $warn;  padding-left: $sp-sm; }
+
+// ---- 横条图 -------------------------------------------------------------
+.bar-row { margin-bottom: $sp-sm; }
+
+.bar-head {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.bar-label {
+  font-size: $fs-small;
+  color: $ink;
+  font-weight: 500;
+}
+
+.bar-sub {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+.bar-value {
+  font-size: $fs-small;
+  color: $ink-2;
+  margin-left: auto;
+}
+
+.bar-track {
+  height: 8px;
+  background: $surface-2;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 8px;
+  border-radius: 4px;
+}
+
+// ---- 状态 ---------------------------------------------------------------
+.state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: $sp-xl $sp-lg;
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $radius;
+}
+
+.state-rule {
+  width: 32px;
+  height: 2px;
+  background: $line;
+  margin-bottom: $sp-md;
+}
+
+.state-rule-block { background: $block; }
+
+.state-title {
+  font-size: $fs-sub;
+  color: $ink;
+  font-weight: 600;
+}
+
+.state-hint {
+  font-size: $fs-small;
+  color: $muted;
+  margin-top: $sp-xs;
+  line-height: 1.6 * $fs-small;
+}
+
+.state-retry { margin-top: $sp-md; }
+
+// ---- 骨架屏 -------------------------------------------------------------
+.skeleton { padding: $sp-xs 0; }
+
+.skeleton-row {
+  height: 72px;
+  background: $surface-2;
+  border-radius: $radius-sm;
+  margin-bottom: $sp-sm;
+}
+
+// ---- 按钮 ---------------------------------------------------------------
+.btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  border: 1px solid transparent;
+}
+
+.btn-md {
+  height: 72px;
+  padding: 0 $sp-lg;
+}
+
+.btn-sm {
+  height: 52px;
+  padding: 0 $sp-md;
+}
+
+.btn-primary {
+  background: $accent;
+  border-color: $accent;
+}
+
+.btn-primary .btn-text { color: #FFFFFF; font-weight: 500; }
+
+.btn-ghost {
+  background: $surface;
+  border-color: $line;
+}
+
+.btn-ghost .btn-text { color: $ink; }
+
+.btn-quiet {
+  background: transparent;
+  border-color: transparent;
+}
+
+.btn-quiet .btn-text { color: $accent; }
+
+.btn-danger {
+  background: $block-soft;
+  border-color: $block-soft;
+}
+
+.btn-danger .btn-text { color: $block; }
+
+.btn-disabled { opacity: .45; }
+
+.btn-text {
+  font-size: $fs-small;
+  line-height: 1.4 * $fs-small;
+}
+
+// ---- Chip ---------------------------------------------------------------
+.chip {
+  height: 52px;
+  padding: 0 $sp-md;
+  margin-right: $sp-sm;
+  margin-bottom: $sp-sm;
+  border-radius: $radius-sm;
+  border: 1px solid $line;
+  background: $surface;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.chip-active {
+  background: $accent-soft;
+  border-color: $accent;
+}
+
+.chip-text {
+  font-size: $fs-small;
+  color: $ink-2;
+}
+
+.chip-text-active { color: $accent; font-weight: 500; }
+
+// ---- 分段控件 -----------------------------------------------------------
+.segmented {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid $line;
+  border-radius: $radius-sm;
+  background: $surface-2;
+  overflow: hidden;
+}
+
+.segment {
+  flex: 1;
+  height: 64px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.segment-active { background: $surface; }
+
+.segment-text {
+  font-size: $fs-small;
+  color: $muted;
+}
+
+.segment-text-active { color: $ink; font-weight: 500; }
+
+// ---- 搜索 ---------------------------------------------------------------
+.search {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 76px;
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $radius-sm;
+  padding: 0 $sp-md;
+}
+
+.search-glyph {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: $surface-2;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-right: $sp-sm;
+}
+
+.search-glyph-text {
+  font-size: $fs-small;
+  color: $muted;
+}
+
+.search-input {
+  flex: 1;
+  font-size: $fs-body;
+  color: $ink;
+  height: 76px;
+}
+
+.search-placeholder { color: $muted; }
+
+.search-clear {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-clear-text { font-size: $fs-title; color: $muted; }
+
+// ---- 表单字段 -----------------------------------------------------------
+.field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: $sp-sm 0;
+  border-bottom: 1px solid $line-2;
+}
+
+.field-label {
+  width: 140px;
+  flex-shrink: 0;
+  font-size: $fs-small;
+  color: $ink-2;
+}
+
+.field-control {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.field-input {
+  flex: 1;
+  font-size: $fs-body;
+  color: $ink;
+  height: 56px;
+}
+
+.field-placeholder { color: $muted; }
+
+.field-suffix {
+  font-size: $fs-small;
+  color: $muted;
+  margin-left: $sp-sm;
+}
+
+// ---- 横向滚动 -----------------------------------------------------------
+.hscroll { white-space: nowrap; width: 100%; }
+
+.hscroll-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-right: $sp-lg;
+}
+
+// ---- 其它 ---------------------------------------------------------------
+.divider {
+  height: 1px;
+  background: $line;
+  margin: $sp-md 0;
+}
+
+.rule-block {
+  display: flex;
+  flex-direction: row;
+}
+
+.rule-line {
+  width: 2px;
+  background: $accent;
+  margin-right: $sp-md;
+}
+
+.rule-content { flex: 1; }

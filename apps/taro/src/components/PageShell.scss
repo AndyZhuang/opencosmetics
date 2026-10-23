@@ -1,0 +1,103 @@
+@use "../styles/tokens.scss" as *;
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: $paper;
+}
+
+.shell-topbar {
+  background: $paper;
+  border-bottom: 1px solid $line;
+}
+
+.topbar {
+  height: $topbar-h;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 $page-pad;
+}
+
+.topbar-left {
+  width: 96px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.topbar-back {
+  width: 56px;
+  height: 56px;
+  margin-left: -8px;
+  border: 1px solid $line;
+  border-radius: 8px;
+  background: $surface;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.topbar-back-text {
+  font-size: $fs-sub;
+  color: $ink;
+}
+
+.topbar-brand {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: $accent;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.topbar-brand-mark {
+  font-size: $fs-small;
+  color: #FFFFFF;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+
+.topbar-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.topbar-title {
+  font-size: $fs-sub;
+  font-weight: 600;
+  color: $ink;
+}
+
+.topbar-sub {
+  font-size: $fs-micro;
+  color: $muted;
+  margin-top: 1px;
+}
+
+.topbar-right {
+  width: 96px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.shell-body {
+  flex: 1;
+  padding: $sp-lg $page-pad $sp-2xl;
+}
+
+.shell-body-tab {
+  padding-bottom: $tabbar-h + $sp-xl;
+}

@@ -1,0 +1,59 @@
+@use "../styles/tokens.scss" as *;
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: $tabbar-h;
+  background: $surface;
+  border-top: 1px solid $line;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.tab-marker {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 40px;
+  height: 2px;
+  margin-left: -20px;
+  background: transparent;
+}
+
+.tab-marker-active { background: $accent; }
+
+.tab-index {
+  font-size: $fs-micro;
+  color: $muted;
+  opacity: .55;
+  line-height: 1.2 * $fs-micro;
+}
+
+.tab-index-active {
+  color: $accent;
+  opacity: 1;
+}
+
+.tab-label {
+  font-size: $fs-small;
+  color: $muted;
+  margin-top: 2px;
+  line-height: 1.3 * $fs-small;
+}
+
+.tab-label-active {
+  color: $ink;
+  font-weight: 600;
+}

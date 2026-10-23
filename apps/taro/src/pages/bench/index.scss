@@ -1,0 +1,59 @@
+@use "../../styles/pages.scss" as *;
+
+// ============================================================================
+// 配方构建器 —— 仅保留本页面特有的行编辑器样式
+// ============================================================================
+
+.bn-row {
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $radius;
+  padding: $sp-md $sp-lg;
+  margin-bottom: $sp-sm;
+}
+
+.bn-row-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: $sp-sm;
+}
+
+.bn-row-idx {
+  font-size: $fs-micro;
+  color: $muted;
+  width: 40px;
+}
+
+.bn-row-name {
+  flex: 1;
+  font-size: $fs-body;
+  color: $ink;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bn-row-pct {
+  font-size: $fs-small;
+  color: $accent;
+  margin-right: $sp-sm;
+}
+
+.bn-row-del {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  color: $muted;
+  font-size: $fs-sub;
+}
+
+.bn-row-inputs {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: $sp-sm;
+}

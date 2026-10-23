@@ -85,3 +85,19 @@ data/saved_formulas/
 # 本地部署包
 opencosmetics_deploy.tar.gz
 *.tar.gz
+
+# ---- Taro / React Native 原生工程 (apps/taro) ----
+apps/taro/android/local.properties
+apps/taro/android/.gradle/
+apps/taro/android/.cxx/
+apps/taro/android/app/src/main/assets/
+apps/taro/ios/Pods/
+apps/taro/ios/build/
+apps/taro/ios/*.xcworkspace
+apps/taro/ios/.xcode.env.local
+apps/taro/ios/FormulaLab.xcodeproj/xcuserdata/
+apps/taro/ios/FormulaLabTests/xcuserdata/
+apps/taro/.metro-health-check*
+apps/taro/.swc/
+apps/taro/*.keystore
+!apps/taro/android/app/debug.keystore
