@@ -41,11 +41,18 @@ jobs:
   build:
     name: Build iOS
     runs-on: macos-14
+    timeout-minutes: 45
     env:
       APP_DIR: apps/taro
       IOS_DIR: apps/taro/ios
       SCHEME: FormulaLab
       BUNDLE_ID: ${{ secrets.IOS_BUNDLE_ID || 'com.formulalab.app' }}
+      # 关掉 Flipper (RN 模板默认开启)。
+      # Flipper 是连真机调试用的, 出包用不上; 而它会把 Folly + libevent 拖进来,
+      # 冷构建多花 5-10 分钟, 而且 Folly 在 Xcode 15 上常出编译错误。
+      # Podfile 里有 flipper_config = ENV['NO_FLIPPER'] == "1" ? disabled : enabled,
+      # pod install 与 xcodebuild 都要看到这个变量, 所以挂在 job 级 env。
+      NO_FLIPPER: '1'
 
     steps:
       - name: Checkout
